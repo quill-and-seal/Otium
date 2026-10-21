@@ -4,10 +4,10 @@ Le temps libre de vos personnages pour **Foundry VTT v14** (système **dnd5e**).
 
 *Otium*, c'est le loisir en latin : le moment où les personnages se posent entre deux aventures. Le module rend ces moments jouables **sans le MJ**, pour qu'il puisse souffler, préparer la suite ou s'occuper d'un autre joueur.
 
-La première scène, c'est **la taverne**, avec deux modes :
+La première scène, c'est **la taverne**, avec deux façons de la jouer :
 
-- **Clientèle** : les joueurs ouvrent la carte et commandent eux-mêmes. Le paiement, la monnaie rendue, le stock, l'annonce dans le chat et, si le MJ le veut, les effets en jeu sont automatiques.
-- **Service** : les joueurs sont le personnel. Ils tirent les bières, cuisinent, servent les tables et encaissent, en temps réel, pendant que le MJ pilote l'affluence.
+- **Clientèle** : les joueurs ouvrent la carte et commandent eux-mêmes. Paiement, monnaie rendue, stock, annonce dans le chat et, si le MJ le veut, effets en jeu : tout est automatique.
+- **Service** : les joueurs sont le personnel. Ils tirent les bières, cuisinent, servent les tables et encaissent, en temps réel, pendant que le MJ règle l'affluence.
 
 Un module de l'atelier [Quill & Seal](https://github.com/quill-and-seal).
 
@@ -19,31 +19,52 @@ Dans Foundry, **Modules complémentaires → Installer un module**, puis colle c
 https://github.com/quill-and-seal/Otium/releases/latest/download/module.json
 ```
 
-## Utilisation
+Active ensuite le module dans ton monde **dnd5e**.
 
-### Côté MJ
+## Démarrage rapide
 
-1. Active le module dans ton monde dnd5e.
-2. Dans le groupe **Jetons** de la barre de gauche, clique sur **Gérer les tavernes** (icône d'échoppe).
-3. Choisis un modèle (**Auberge de village**, **Taverne de port**, **Établissement chic** ou **Taverne vide**) puis **Créer**.
-4. Ajuste la taverne : nom, tenancier, description, et la carte (articles, catégorie, prix, stock, effet).
-5. Clique sur la **porte** pour ouvrir la taverne sur la scène active. Un message l'annonce dans le chat.
+1. **MJ** : dans la barre de gauche, groupe **Jetons**, clique sur **Gérer les tavernes** (icône d'échoppe).
+2. Choisis un modèle (**Auberge de village**, **Taverne de port** ou **Établissement chic**) et clique sur **Créer**.
+3. Clique sur la **porte** à côté de la taverne pour l'ouvrir sur la scène active.
+4. **Joueurs** : dans le groupe Jetons, l'icône de **chope** ouvre la carte. Ils commandent seuls.
 
-Sur la carte, un **stock vide** veut dire illimité. L'œil permet de voir la carte comme un joueur.
+Pour que les joueurs tiennent la taverne à la place, voir [Mode Service](#mode-service--les-joueurs-tiennent-la-taverne).
 
-### Côté joueurs
+## Les outils
 
-1. Dans le groupe **Jetons**, clique sur l'icône de **chope**.
-2. Choisis le personnage qui paie (par défaut : le jeton sélectionné, sinon ton personnage).
+Tout se trouve dans le groupe **Jetons** de la barre de gauche :
+
+| Outil | Pour qui | Rôle |
+| --- | --- | --- |
+| Chope — *Carte de la taverne* | Tous | Commander. Pendant un service : s'attabler et commander aux serveurs |
+| Clochette — *Service : prendre son poste* | Joueurs | Ouvrir son poste de serveur |
+| Presse-papiers — *Service (MJ)* | MJ | Ouvrir, piloter et terminer un service |
+| Échoppe — *Gérer les tavernes* | MJ | Créer, modifier, ouvrir et fermer les tavernes |
+
+## Mode Clientèle : les joueurs commandent seuls
+
+### Préparer une taverne (MJ)
+
+Dans **Gérer les tavernes** :
+
+- **Créer** à partir d'un modèle, ou d'une taverne vide.
+- **Crayon** : modifier le nom, le tenancier, la description et la carte. Pour chaque article : catégorie (boissons, plats, chambres, divers), prix, stock (vide = illimité), effet, et poste de service.
+- **Porte** : ouvrir ou fermer la taverne sur la scène active. L'ouverture est annoncée dans le chat.
+- **Œil** : voir la carte comme un joueur.
+
+### Commander (joueurs)
+
+1. Clique sur la **chope**.
+2. Choisis le personnage qui paie : par défaut le jeton sélectionné, sinon ton personnage.
 3. Ajoute des articles avec **+** et **−**, puis **Commander**.
 
-La commande passe tout de suite : la bourse est débitée (avec rendu de monnaie), le stock baisse et le chat l'annonce.
+La bourse est débitée avec rendu de monnaie, le stock baisse et le chat annonce la commande.
 
 ### Effets en jeu (au choix du MJ)
 
 Une case par taverne, **Effets en jeu**, les active ou non :
 
-- **Boissons** : chaque boisson a un degré (0 à 3). Les degrés s'additionnent jusqu'au prochain repos long. À 3, le personnage est **Éméché** (pour le roleplay) ; à 6, il est **Ivre** et reçoit l'état **Empoisonné**. Le repos long efface tout (et retire Empoisonné seulement s'il venait d'Otium).
+- **Boissons** : chaque boisson a un degré (0 à 3). Les degrés s'additionnent jusqu'au prochain repos long. À 3, le personnage est **Éméché** (pour le roleplay) ; à 6, il est **Ivre** et reçoit l'état **Empoisonné**. Le repos long efface tout, et ne retire Empoisonné que s'il venait d'Otium.
 - **Plats** : des points de vie temporaires, gardés seulement s'ils dépassent ceux que le personnage a déjà.
 - **Chambres** : la fenêtre de repos court ou long de dnd5e s'ouvre après la commande.
 
@@ -51,49 +72,76 @@ Sans effets, une commande se contente de payer et de s'annoncer.
 
 ## Mode Service : les joueurs tiennent la taverne
 
-Pendant un service, les personnages sont le personnel. Les clients entrent, commandent et s'impatientent ; il faut préparer, servir et encaisser avant qu'ils partent.
+Pendant un service, les personnages sont le personnel. Les clients entrent, commandent et s'impatientent : il faut préparer, servir et encaisser avant qu'ils partent.
 
-### Côté MJ
+### Lancer un service (MJ)
 
-1. Ouvre une taverne sur la scène (voir plus haut), puis l'outil **Service (MJ)** dans le groupe Jetons.
-2. Choisis le nombre de tables et clique sur **Ouvrir le service**. Un message invite les joueurs à prendre leur poste.
-3. Clique sur **Lancer le service** quand tout le monde est prêt.
+1. Ouvre une taverne sur la scène (voir plus haut).
+2. Ouvre l'outil **Service (MJ)**, choisis le nombre de tables et clique sur **Ouvrir le service**. Le chat invite les joueurs à prendre leur poste.
+3. Quand tout le monde est prêt, clique sur **Lancer le service**.
 
-Pendant le service : pause, vitesse ×2, affluence (calme, normale, coup de feu), patience des clients, et des événements (client pressé, grande tablée). La salle, le personnel et le journal se suivent en direct. **Terminer le service** affiche le bilan ; **Verser les pourboires** les répartit sur les fiches des serveurs.
+Pendant le service, le MJ peut :
 
-### Côté serveurs
+- mettre en **pause** ou accélérer (**×2**) ;
+- régler l'**affluence** (calme, normale, coup de feu) et la **patience** des clients ;
+- faire entrer un client, un **client pressé** ou une **grande tablée** ;
+- suivre la salle, le personnel et le journal en direct.
 
-L'outil **Service : prendre son poste** ouvre le poste de serveur. Choisis ton personnage, puis :
+**Terminer le service** affiche le bilan (recette, pourboires, satisfaction). **Verser les pourboires** les répartit sur les fiches des serveurs, et les stocks consommés sont retirés de la taverne.
 
-- **Tireuse** : maintiens le bouton et relâche dans la zone verte. Une chope parfaite rapporte un meilleur pourboire, trop longtemps et ça déborde.
+### Servir (joueurs)
+
+Ouvre l'outil **Service : prendre son poste**, choisis ton personnage, puis :
+
+- **Tireuse** : maintiens le bouton et relâche dans la zone verte. Une chope parfaite rapporte un meilleur pourboire ; trop longtemps et ça déborde.
 - **Cuisine** : trois feux. Un plat prêt doit être sorti vite, sinon il brûle.
-- **Planche et cave** : pain, vin… ton personnage est occupé pendant la préparation.
-- **Comptoir et plateau** : clique un plat pour le charger (trois places), puis **Servir** sur une table. Tu peux aussi tout faire en glisser-déposer.
+- **Planche et cave** : pain, vin… Ton personnage est occupé pendant la préparation.
+- **Comptoir et plateau** : clique un plat pour le charger (trois places), puis **Servir** sur une table. Le plateau propose directement les tables qui attendent ce que tu portes. Tout se fait aussi en glisser-déposer.
 - **Encaisser** : rends la monnaie juste. Trop peu, pas de pourboire ; trop, la taverne perd la différence.
 
-### Côté clients
+### S'attabler (joueurs clients)
 
-Pendant un service, la **chope** installe le joueur à une table : sa commande part chez les serveurs au lieu de passer toute seule. Il suit l'avancement, peut appeler un serveur, et paie quand on vient encaisser.
+Pendant un service, la **chope** installe le joueur à une table : sa commande part chez les serveurs au lieu de passer toute seule. Il suit l'avancement, peut **appeler un serveur**, et paie quand on vient encaisser.
 
-### Postes de service sur la scène
+### Préparer les articles pour le service (MJ)
 
-Pour jouer le service avec les jetons, dessine des **Régions** (outil Régions de Foundry, invisibles aux joueurs) et ajoute-leur le comportement **Otium — Poste de service** :
+Dans les réglages d'une taverne, la colonne **Service** indique pour chaque article :
 
-- **Poste de travail** sur le comptoir, la cuisine… Coche ce qu'on peut y faire : comptoir, tireuse, cuisine, planche et cave, caisse. Un serveur ne peut alors faire une action que si son jeton est dans un poste qui l'autorise, et la vue Serveur lui indique où aller. Entrer dans un poste fait prendre son poste et ouvre la vue Serveur.
-- **Table**, avec son numéro : un joueur qui y pose son jeton pendant un service s'y installe, et sa vue Client s'ouvre.
+- le **poste** qui le prépare : tireuse, cuisine, planche et cave, ou *pas en salle* (pour les chambres) ;
+- son **temps de préparation**, en secondes, pour la cuisine et la planche.
 
-Sans aucun poste de travail sur la scène, tout reste permis partout, comme avant.
+Les trois modèles sont déjà réglés.
 
-### Réglages de la carte
+## Postes de service : jouer avec les jetons
 
-Dans les réglages d'une taverne, la colonne **Service** indique le poste qui prépare chaque article (tireuse, cuisine, planche et cave, ou pas en salle pour les chambres) et son temps de préparation.
+C'est facultatif. Sans postes, tout se fait depuis les fenêtres. Avec, il faut amener son jeton au bon endroit : derrière le bar pour tirer une bière, en cuisine pour sortir le ragoût.
 
-Le service vit chez le MJ connecté : s'il recharge sa page, le service en cours est perdu.
+Les postes sont des **Régions** de Foundry, invisibles aux joueurs, auxquelles on ajoute le comportement d'Otium :
 
-### Bon à savoir
+1. Dans la barre de gauche, ouvre l'outil **Régions** (avec les Jetons, les Murs, les Lumières…).
+2. Dessine une zone sur le comptoir (rectangle ou polygone).
+3. Ouvre sa configuration (double-clic sur la zone), onglet **Comportements**, bouton **+**, puis **Otium — Poste de service**.
+4. Choisis le **type de zone** :
+   - **Poste de travail** : coche ce qu'on peut y faire parmi *comptoir, tireuse, cuisine, planche et cave, caisse*. Par exemple « comptoir + tireuse + caisse » sur le bar, « cuisine + planche et cave » derrière.
+   - **Table** : indique son numéro.
+5. Recommence pour chaque poste et chaque table.
 
-- Les articles en **stock limité** demandent qu'un MJ soit connecté (c'est lui qui met le stock à jour).
-- Un MJ peut commander pour n'importe quel personnage, un joueur seulement pour les siens.
+En jeu :
+
+- Dès que la scène a **au moins un poste de travail**, un serveur ne peut faire une action que si son jeton est dans un poste qui l'autorise. La vue Serveur montre où il se trouve, grise les postes hors de portée et indique où aller. Le MJ revérifie chaque action.
+- Amener son jeton dans un poste **fait prendre son poste** et ouvre la vue Serveur.
+- Poser son jeton sur une **table** pendant un service y installe le joueur et ouvre sa vue Client. Il change de table en déplaçant son jeton, et la libère en sortant s'il n'a rien commandé.
+
+## Bon à savoir
+
+- **Un MJ doit être connecté** pour le service et pour les articles en stock limité : c'est lui qui valide les actions et met le stock à jour.
+- Le service vit chez le **MJ actif** (le premier MJ connecté). S'il recharge sa page, le service en cours est perdu.
+- Un MJ peut commander ou servir pour n'importe quel personnage ; un joueur seulement pour les siens.
+- Système **dnd5e** uniquement pour l'instant.
+
+## Banc d'essai
+
+`docs/preview.html` fait tourner le vrai code du module dans un faux Foundry, sans rien installer : on joue le MJ ou un joueur, on commande, on lance un service, on déplace les jetons entre les postes. Pour le régénérer : `npm install && npm run build:preview`.
 
 ## API
 
@@ -106,13 +154,13 @@ Le service vit chez le MJ connecté : s'il recharge sa page, le service en cours
 | `getTaverns()`, `getTavern(id)`, `sceneTavern(scene?)` | Lecture |
 | `saveTavern(tavern)`, `deleteTavern(id)`, `setSceneTavern(scene, id)` | Écriture (MJ) |
 | `newTavern(data)`, `newItem(data)`, `templates` | Construire une taverne |
-| `placeOrder(actor, tavernId, { [itemId]: qty })` | Passer une commande |
+| `placeOrder(actor, tavernId, { [itemId]: qty })` | Passer une commande (mode Clientèle) |
 | `drunkLevel(actor)`, `addAlcohol(actor, n)`, `sober(actor)` | Ivresse |
 | `service.get()`, `service.open({ tables })`, `service.send(op)` | Mode Service |
-| `service.openGM()`, `service.openServer()`, `service.openClient()` | Fenêtres du service |
+| `service.openGM()`, `service.openServer(actorId?)`, `service.openClient(actorId?)` | Fenêtres du service |
 
 Hook : `otium.orderPlaced` reçoit `{ actor, tavern, lines, total }` (total en pièces de cuivre).
 
 ## Feuille de route
 
-Voir [ROADMAP.md](ROADMAP.md) : jets de compétence pendant le service, mini-jeux, puis d'autres activités de temps libre.
+Voir [ROADMAP.md](ROADMAP.md) : jets de compétence pendant le service, ardoise et tournées, puis les mini-jeux de dés et de cartes.

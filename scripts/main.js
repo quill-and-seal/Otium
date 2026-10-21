@@ -59,9 +59,9 @@ Hooks.once("init", () => {
       open: openService,
       send: sendOp,
       payTips,
-      openServer: () => openServiceServer(),
+      openServer: (actorId) => openServiceServer(actorId),
       openGM: () => openServiceGM(),
-      openClient: () => openServiceClient()
+      openClient: (actorId) => openServiceClient(actorId)
     }
   };
 });
