@@ -75,6 +75,15 @@ L'outil **Service : prendre son poste** ouvre le poste de serveur. Choisis ton p
 
 Pendant un service, la **chope** installe le joueur à une table : sa commande part chez les serveurs au lieu de passer toute seule. Il suit l'avancement, peut appeler un serveur, et paie quand on vient encaisser.
 
+### Postes de service sur la scène
+
+Pour jouer le service avec les jetons, dessine des **Régions** (outil Régions de Foundry, invisibles aux joueurs) et ajoute-leur le comportement **Otium — Poste de service** :
+
+- **Poste de travail** sur le comptoir, la cuisine… Coche ce qu'on peut y faire : comptoir, tireuse, cuisine, planche et cave, caisse. Un serveur ne peut alors faire une action que si son jeton est dans un poste qui l'autorise, et la vue Serveur lui indique où aller. Entrer dans un poste fait prendre son poste et ouvre la vue Serveur.
+- **Table**, avec son numéro : un joueur qui y pose son jeton pendant un service s'y installe, et sa vue Client s'ouvre.
+
+Sans aucun poste de travail sur la scène, tout reste permis partout, comme avant.
+
 ### Réglages de la carte
 
 Dans les réglages d'une taverne, la colonne **Service** indique le poste qui prépare chaque article (tireuse, cuisine, planche et cave, ou pas en salle pour les chambres) et son temps de préparation.

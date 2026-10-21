@@ -13,6 +13,7 @@ import { OtiumApp, openApps } from "./apps.js";
 import { sceneTavern } from "./store.js";
 import { formatCp, formatWallet, cashGiven, walletToCp } from "./currency.js";
 import { buyerCandidates, defaultBuyer } from "./order.js";
+import { zoneActions } from "./zones.js";
 import {
   SERVICE, RUSH, getService, getSummary, serviceNow, onServiceChange, sendOp,
   openService, payTips, dismissSummary, menuItem, ticketTotal, isBusy
@@ -199,6 +200,8 @@ export class ServiceServerApp extends ServiceApp {
     const myTicket = Object.values(s.tickets).find((tk) => tk.cashier === st.id);
     if (!myTicket) this.cash = null;
     const off = !s.running;
+    // Postes de service (Régions) : null = pas de poste sur la scène, tout est permis
+    this.allowed = zoneActions(s.sceneId, st.id);
 
     return `
       ${this._statusHtml(s, st, now, busy)}
@@ -226,6 +229,17 @@ export class ServiceServerApp extends ServiceApp {
       </div>`;
   }
 
+  /** L'action est-elle permise là où se trouve le jeton ? */
+  can(action) {
+    return !this.allowed || this.allowed.has(action);
+  }
+
+  /** Bandeau « placez votre jeton » d'un poste qui n'est pas accessible d'ici. */
+  _lockHtml(action) {
+    if (this.can(action)) return "";
+    return `<p class="otium-lock"><i class="fa-solid fa-location-dot"></i> ${L("Zone.MoveTo", { zone: t(`Zone.${action}`) })}</p>`;
+  }
+
   _statusHtml(s, st, now, busy) {
     let status;
     if (this.tap) status = `<span class="otium-busy">${L("Busy.Tap")}…</span>`;
@@ -238,6 +252,11 @@ export class ServiceServerApp extends ServiceApp {
         <span class="otium-clock" data-otium-clock>${clock(now)}</span>
         <button type="button" class="icon" data-action="leave" data-tooltip="${esc(L("Server.Leave"))}" ${busy ? "disabled" : ""}><i class="fa-solid fa-right-from-bracket"></i></button>
         <div class="otium-status-bar">${bar("busy", st.id, "neutral")}</div>
+        ${this.allowed
+          ? `<span class="otium-position"><i class="fa-solid fa-location-dot"></i> ${this.allowed.size
+              ? L("Zone.Here", { zones: [...this.allowed].map((a) => t(`Zone.${a}`)).join(", ") })
+              : L("Zone.Nowhere")}</span>`
+          : ""}
       </div>`;
   }
 
@@ -276,7 +295,7 @@ export class ServiceServerApp extends ServiceApp {
         let action;
         if (!bill) action = `<button type="button" data-action="serve" data-table="${tb.n}" ${disabled || !needs ? "disabled" : ""}>${L("Server.Serve")}</button>`;
         else if (cashing) action = `<span class="hint">${L("Server.CashedBy", { name: esc(cashing) })}</span>`;
-        else action = `<button type="button" class="otium-primary" data-action="cash" data-table="${tb.n}" ${disabled || ticket.cashier ? "disabled" : ""}>${L("Server.Cash", { total: formatCp(ticketTotal(s, ticket)) })}</button>`;
+        else action = `<button type="button" class="otium-primary" data-action="cash" data-table="${tb.n}" ${disabled || ticket.cashier || !this.can("cash") ? "disabled" : ""}>${L("Server.Cash", { total: formatCp(ticketTotal(s, ticket)) })}</button>`;
         return `
           <article class="otium-table ${bill ? "bill" : ""} ${ticket.calling ? "calling" : ""}" ${bill ? "" : `data-drop="table:${tb.n}"`}>
             <header><strong>${L("Table", { n: tb.n })}</strong><span class="hint">${bill ? L("Server.Bill") : ticket.kind === "player" ? L("Server.Player") : ""}</span></header>
@@ -297,15 +316,16 @@ export class ServiceServerApp extends ServiceApp {
     const last = st?.lastTap && serviceNow() - st.lastTap.at < 6 ? st.lastTap : null;
     const lastCls = last ? ({ Perfect: "done", Fine: "", Spilled: "bad", TooLittle: "bad" })[last.key] : "";
     return `
-      <div class="otium-station">
+      <div class="otium-station ${this.can("tap") ? "" : "locked"}">
         <h4>${L("Station.Tap")}</h4>
+        ${this._lockHtml("tap")}
         <div class="otium-chips">
           ${drinks.map((d) => `<label class="otium-radio"><input type="radio" name="drink" value="${d.id}" ${d.id === this.drink ? "checked" : ""}> ${esc(d.name)}</label>`).join("")}
         </div>
         <div class="otium-tap">
           <div class="otium-glass" aria-hidden="true"><div class="otium-target"></div><div class="otium-beer" data-otium-beer></div></div>
           <div class="otium-tap-side">
-            <button type="button" class="otium-tap-btn ${this.tap ? "holding" : ""}" data-tap ${disabled && !this.tap ? "disabled" : ""}>${L("Station.Hold")}</button>
+            <button type="button" class="otium-tap-btn ${this.tap ? "holding" : ""}" data-tap ${(disabled || !this.can("tap")) && !this.tap ? "disabled" : ""}>${L("Station.Hold")}</button>
             <span class="hint">${L("Station.HoldHint")}</span>
             ${last ? `<span class="otium-chip ${lastCls}">${L(`TapResult.${last.key}`)}</span>` : ""}
           </div>
@@ -313,7 +333,8 @@ export class ServiceServerApp extends ServiceApp {
       </div>`;
   }
 
-  _stoveHtml(s, disabled) {
+  _stoveHtml(s, busy) {
+    const disabled = busy || !this.can("stove");
     const dishes = s.menu.filter((m) => m.station === "stove");
     const slots = s.stove
       .map((slot, i) => {
@@ -330,13 +351,14 @@ export class ServiceServerApp extends ServiceApp {
             <button type="button" class="otium-primary" data-action="takeOut" data-slot="${i}" ${disabled ? "disabled" : ""}>${L("Station.TakeOut", { dish: name })}</button></div>`;
         }
         return `<div class="otium-slot burnt"><span class="otium-label">${L("Station.Fire", { n })} · ${L("Station.Burnt")}</span>
-          <button type="button" data-action="trash" data-slot="${i}">${L("Station.Trash")}</button></div>`;
+          <button type="button" data-action="trash" data-slot="${i}" ${this.can("stove") ? "" : "disabled"}>${L("Station.Trash")}</button></div>`;
       })
       .join("");
-    return `<div class="otium-station"><h4>${L("Station.Stove")}</h4>${slots}</div>`;
+    return `<div class="otium-station ${this.can("stove") ? "" : "locked"}"><h4>${L("Station.Stove")}</h4>${this._lockHtml("stove")}${slots}</div>`;
   }
 
-  _boardHtml(s, disabled) {
+  _boardHtml(s, busy) {
+    const disabled = busy || !this.can("board");
     const dishes = s.menu.filter((m) => m.station === "board");
     const full = s.board.every(Boolean);
     const buttons = dishes.map((d) => `<button type="button" data-action="prep" data-m="${d.id}" ${disabled || full ? "disabled" : ""}>${esc(d.name)}</button>`).join("");
@@ -347,7 +369,7 @@ export class ServiceServerApp extends ServiceApp {
           : `<div class="otium-slot"><span class="otium-label">${L("Station.Board", { n: i + 1 })} · ${L("Station.Free")}</span></div>`
       )
       .join("");
-    return `<div class="otium-station"><h4>${L("Station.Cellar")}</h4><div class="otium-chips">${buttons || `<span class="hint">${L("Station.Empty")}</span>`}</div>${slots}</div>`;
+    return `<div class="otium-station ${this.can("board") ? "" : "locked"}"><h4>${L("Station.Cellar")}</h4>${this._lockHtml("board")}<div class="otium-chips">${buttons || `<span class="hint">${L("Station.Empty")}</span>`}</div>${slots}</div>`;
   }
 
   _counterHtml(s, st, disabled) {
@@ -359,6 +381,7 @@ export class ServiceServerApp extends ServiceApp {
     }
     groups.sort((a, b) => (STATION_ORDER[menuItem(s, a.m)?.station] ?? 3) - (STATION_ORDER[menuItem(s, b.m)?.station] ?? 3));
     const trayFull = st.tray.length >= SERVICE.tray;
+    const passLocked = !this.can("pass");
     const dishTile = (m, perfect, extra = "") => {
       const item = menuItem(s, m);
       return `<span class="otium-dish-name">${esc(item?.name)}</span>${perfect ? `<span class="otium-dish-tag">${L("Perfect")}</span>` : ""}${extra}`;
@@ -368,7 +391,7 @@ export class ServiceServerApp extends ServiceApp {
       .map((g) => {
         const item = menuItem(s, g.m);
         return `<button type="button" class="otium-dish st-${item?.station}" data-action="take" data-uid="${g.uids[0]}" data-drag="pass:${g.uids[0]}" data-label="${esc(item?.name)}"
-          ${trayFull ? "disabled" : ""} data-tooltip="${esc(trayFull ? L("Counter.TrayFull") : L("Counter.TakeHint"))}">
+          ${trayFull || passLocked ? "disabled" : ""} data-tooltip="${esc(passLocked ? L("Zone.MoveTo", { zone: t("Zone.pass") }) : trayFull ? L("Counter.TrayFull") : L("Counter.TakeHint"))}">
           ${dishTile(g.m, g.perfect, g.uids.length > 1 ? `<span class="otium-dish-count">×${g.uids.length}</span>` : "")}</button>`;
       })
       .join("");
@@ -414,6 +437,7 @@ export class ServiceServerApp extends ServiceApp {
       <div class="otium-counter">
         <section class="otium-shelf" data-drop="pass">
           <header><h3 class="otium-section">${L("Counter.Pass")}</h3><span class="hint">${L("Counter.Ready", { n: s.pass.length })}</span></header>
+          ${this._lockHtml("pass")}
           <div class="otium-dish-grid">${pass || `<p class="hint">${L("Counter.PassEmpty")}</p>`}</div>
         </section>
         <section class="otium-shelf" data-drop="tray">
@@ -937,12 +961,23 @@ export class ServiceClientApp extends ServiceApp {
 /*  Ouvrir les fenêtres                         */
 /* -------------------------------------------- */
 
-function openSingle(Cls) {
-  const existing = [...openApps].find((app) => app instanceof Cls);
-  if (existing) return existing.render({ force: true });
-  return new Cls().render({ force: true });
+function openSingle(Cls, configure) {
+  const app = [...openApps].find((a) => a instanceof Cls) ?? new Cls();
+  configure?.(app);
+  return app.render({ force: true });
 }
 
-export const openServiceServer = () => openSingle(ServiceServerApp);
+/** Vue Serveur ; avec un personnage, c'est lui qui est choisi. */
+export const openServiceServer = (actorId) =>
+  openSingle(ServiceServerApp, (app) => {
+    if (actorId) app.pendingActor = app.actorId = actorId;
+  });
 export const openServiceGM = () => openSingle(ServiceGMApp);
-export const openServiceClient = () => openSingle(ServiceClientApp);
+/** Vue Client ; avec un personnage, c'est lui qui commande. */
+export const openServiceClient = (actorId) =>
+  openSingle(ServiceClientApp, (app) => {
+    if (actorId) {
+      if (app.actorId !== actorId) app.cart.clear();
+      app.actorId = actorId;
+    }
+  });

@@ -110,6 +110,8 @@
   .chips { display: flex; flex-wrap: wrap; gap: 4px; }
   .chip { font-size: 0.78rem; padding: 1px 8px; border-radius: 999px; background: var(--ale-soft); color: var(--fg); }
   .chip.danger { background: var(--danger-soft); color: var(--danger); }
+  .actor .where { display: flex; flex-direction: column; gap: 2px; font-size: 0.8rem; color: var(--muted); }
+  .actor .where select { background: var(--input); border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; min-height: 28px; color: var(--fg); }
   .actor-actions { display: flex; flex-wrap: wrap; gap: 4px; }
   .actor-actions button { flex: 1 1 auto; }
 
@@ -223,6 +225,7 @@
         <li>Enchaîner les eaux-de-vie jusqu'à Ivre, puis Repos long.</li>
         <li>Côté MJ : créer une taverne, modifier la carte, l'ouvrir et la fermer.</li>
         <li>Service : en MJ, outil « Service (MJ) », ouvrir puis lancer. En Alice, outil « Service », prendre son poste. En Bruno, la chope installe Lyra à une table.</li>
+        <li>Postes de service : la scène a un comptoir, une cuisine et trois tables. Déplacez le jeton de Thorin (« Jeton sur la scène ») : seuls les postes de sa zone répondent. Posez Lyra sur une table pendant un service : elle s'y installe.</li>
       </ul>
     </section>
   </div>

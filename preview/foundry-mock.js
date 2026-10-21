@@ -175,12 +175,12 @@ class EffectMock {
     return getProperty(this.flags ?? {}, `${scope}.${key}`);
   }
   async update(data) {
-    if (!this.parent.isOwner) throw permission(`l'effet de ${this.parent.name}`);
+    if (!this.parent.isOwner && !bench.privileged) throw permission(`l'effet de ${this.parent.name}`);
     Object.assign(this, deepClone(data));
     this.parent._changed({ effects: true });
   }
   async delete() {
-    if (!this.parent.isOwner) throw permission(`l'effet de ${this.parent.name}`);
+    if (!this.parent.isOwner && !bench.privileged) throw permission(`l'effet de ${this.parent.name}`);
     this.parent.effects = this.parent.effects.filter((e) => e !== this);
     this.parent._changed({ effects: true });
   }
@@ -201,13 +201,13 @@ class ActorMock {
     this.statuses = new Set();
   }
   get isOwner() {
-    return game.user.isGM || bench.privileged || game.user.id === this.ownerId;
+    return game.user.isGM || game.user.id === this.ownerId;
   }
   testUserPermission(user) {
     return !!user?.isGM || user?.id === this.ownerId;
   }
   async update(changes) {
-    if (!this.isOwner) throw permission(this.name);
+    if (!this.isOwner && !bench.privileged) throw permission(this.name);
     for (const [k, v] of Object.entries(changes)) setProperty(this, k, deepClone(v));
     this._changed(changes);
     return this;
@@ -219,20 +219,20 @@ class ActorMock {
     return this.update({ [`flags.${scope}.${key}`]: value });
   }
   async unsetFlag(scope, key) {
-    if (!this.isOwner) throw permission(this.name);
+    if (!this.isOwner && !bench.privileged) throw permission(this.name);
     if (this.flags[scope]) delete this.flags[scope][key];
     this._changed({ flags: true });
     return this;
   }
   async createEmbeddedDocuments(type, list) {
-    if (!this.isOwner) throw permission(this.name);
+    if (!this.isOwner && !bench.privileged) throw permission(this.name);
     const created = list.map((d) => new EffectMock(this, d));
     this.effects.push(...created);
     this._changed({ effects: true });
     return created;
   }
   async toggleStatusEffect(id, { active } = {}) {
-    if (!this.isOwner) throw permission(this.name);
+    if (!this.isOwner && !bench.privileged) throw permission(this.name);
     const on = active ?? !this.statuses.has(id);
     if (on) this.statuses.add(id);
     else this.statuses.delete(id);
@@ -246,7 +246,7 @@ class ActorMock {
     return this.#rest("short", dialog);
   }
   async #rest(kind, dialog) {
-    if (!this.isOwner) throw permission(this.name);
+    if (!this.isOwner && !bench.privileged) throw permission(this.name);
     if (dialog) {
       const ok = await foundry.applications.api.DialogV2.confirm({
         window: { title: kind === "long" ? "Repos long (dnd5e)" : "Repos court (dnd5e)" },
@@ -293,6 +293,8 @@ class SceneMock {
 }
 
 export const scene = new SceneMock({ id: "scene1", name: "Salle commune" });
+scene.regions = [];
+scene.tokens = [];
 
 /* -------------------------------------------- */
 /*  game, canvas, ui, CONFIG, ChatMessage       */
@@ -319,7 +321,7 @@ globalThis.game = {
     filter: (fn) => actors.filter(fn),
     [Symbol.iterator]: () => actors[Symbol.iterator]()
   },
-  scenes: [scene],
+  scenes: Object.assign([scene], { get: (id) => (id === scene.id ? scene : undefined) }),
   modules: new Map([["otium", { id: "otium" }]]),
   i18n: {
     lang: "fr",
@@ -582,9 +584,69 @@ const DialogV2 = {
   }
 };
 
+/* -------------------------------------------- */
+/*  Régions : juste ce qu'il faut aux zones     */
+/* -------------------------------------------- */
+
+class Field {
+  constructor(...args) {
+    this.args = args;
+  }
+}
+class RegionBehaviorType {}
+
+globalThis.CONST = { REGION_EVENTS: { TOKEN_ENTER: "tokenEnter", TOKEN_EXIT: "tokenExit" } };
+globalThis.CONFIG.RegionBehavior = { dataModels: {}, typeIcons: {} };
+
 globalThis.foundry = {
   utils: { deepClone, randomID, getProperty, setProperty, hasProperty, expandObject, mergeObject: mergeDeep },
-  applications: { api: { ApplicationV2, DialogV2 } }
+  applications: { api: { ApplicationV2, DialogV2 } },
+  data: {
+    regionBehaviors: { RegionBehaviorType },
+    fields: { StringField: Field, SetField: Field, NumberField: Field, BooleanField: Field }
+  }
 };
+
+/** Pose une zone (Région + comportement Otium) sur la scène du banc. */
+export function addZone(name, system) {
+  const Cls = CONFIG.RegionBehavior.dataModels["otium.station"];
+  const data = Object.assign(Object.create(Cls.prototype), system);
+  const region = { id: randomID(8), name, behaviors: [{ type: "otium.station", disabled: false, system: data }] };
+  scene.regions.push(region);
+  return region;
+}
+
+/** Jetons des personnages sur la scène du banc. */
+export function tokenOf(actor) {
+  let token = scene.tokens.find((tk) => tk.actorId === actor.id);
+  if (!token) {
+    token = { id: randomID(8), actorId: actor.id, actor, parent: scene, regions: new Set(), elevation: 0 };
+    scene.tokens.push(token);
+  }
+  return token;
+}
+
+/** Déplace un jeton dans une zone (ou hors zones) en déclenchant les événements des Régions. */
+export async function moveToken(actor, region) {
+  const token = tokenOf(actor);
+  const Cls = CONFIG.RegionBehavior.dataModels["otium.station"];
+  const fire = async (name, r) => {
+    for (const b of r.behaviors) {
+      const fn = Cls.events?.[name];
+      if (fn) await fn.call(b.system, { name, data: { token }, user: game.user, region: r });
+    }
+  };
+  for (const r of [...token.regions]) {
+    if (r === region) continue;
+    token.regions.delete(r);
+    await fire("tokenExit", r);
+  }
+  if (region && !token.regions.has(region)) {
+    token.regions.add(region);
+    await fire("tokenEnter", region);
+  }
+  Hooks.callAll("updateToken", token, { x: 0, y: 0 });
+  bench.emit("actors");
+}
 
 setLanguage("fr");

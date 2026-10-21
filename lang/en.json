@@ -289,7 +289,9 @@
         "TableTaken": "This table is taken.",
         "NotSeated": "Sit down at a table first.",
         "ExactNoTip": "Exact change!",
-        "NotActiveGM": "Only the active GM (the first connected GM) can open a service."
+        "NotActiveGM": "Only the active GM (the first connected GM) can open a service.",
+        "NotHere": "{name} must be in a \"{zone}\" station for that.",
+        "NoSuchTable": "Table {n} doesn't exist in this service."
       },
       "Log": {
         "Opened": "Service opens at {tavern}.",
@@ -310,7 +312,44 @@
         "LeftAngry": "Table {n}: {name} is tired of waiting and leaves.",
         "LeftUnpaid": "Table {n}: {name} leaves without paying ({total} lost).",
         "Burnt": "{dish} burnt on fire {n}."
+      },
+      "Zone": {
+        "MoveTo": "Move your token into a \"{zone}\" station.",
+        "Here": "Station: {zones}",
+        "Nowhere": "Your token isn't in any service station."
       }
+    },
+    "Zone": {
+      "pass": "Counter",
+      "tap": "Tap",
+      "stove": "Kitchen",
+      "board": "Board and cellar",
+      "cash": "Till"
+    },
+    "RegionBehavior": {
+      "Mode": {
+        "work": "Work station",
+        "table": "Table"
+      },
+      "FIELDS": {
+        "mode": {
+          "label": "Zone type",
+          "hint": "Work station: a waiter can only do what is ticked here, with their token in the zone. Table: a player who puts their token here sits at that table during a service."
+        },
+        "actions": {
+          "label": "What can be done here",
+          "hint": "For a work station. As soon as a scene has one, every service action must be done from a station that allows it."
+        },
+        "table": {
+          "label": "Table number",
+          "hint": "For a Table zone: the service table the player sits at."
+        }
+      }
+    }
+  },
+  "TYPES": {
+    "RegionBehavior": {
+      "otium.station": "Otium — Service station"
     }
   }
 }

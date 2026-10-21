@@ -1,5 +1,15 @@
 # Journal des versions
 
+## 0.1.2
+
+Les postes de service : la taverne se joue sur la scène.
+
+- Nouveau comportement de Région **Otium — Poste de service**, invisible aux joueurs comme toutes les Régions
+- **Poste de travail** : le MJ coche ce qu'on peut y faire (comptoir, tireuse, cuisine, planche et cave, caisse). Dès qu'une scène a un poste, chaque action du service se fait depuis un poste qui l'autorise, avec son jeton dedans ; sans poste, tout reste permis partout
+- Entrer dans un poste fait prendre son poste au personnage et ouvre la vue Serveur du joueur
+- **Table** : un joueur qui pose son jeton sur une table s'y installe pendant un service (et la vue Client s'ouvre) ; il change de table en déplaçant son jeton, et la quitte en sortant s'il n'a rien commandé
+- Vue Serveur : position du jeton affichée, postes hors de portée grisés avec l'indication du poste à rejoindre
+
 ## 0.1.1
 
 Le mode Service : les joueurs tiennent la taverne.

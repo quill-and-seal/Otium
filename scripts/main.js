@@ -16,6 +16,7 @@ import { addAlcohol, sober, drunkLevel } from "./effects.js";
 import { MenuApp, refreshApps, openApps, openMenu, openSceneMenu, openTavernList } from "./apps.js";
 import { getService, getSummary, openService, sendOp, handleServiceSocket, requestSync, payTips } from "./service.js";
 import { ServiceClientApp, openServiceServer, openServiceGM, openServiceClient } from "./service-apps.js";
+import { registerStationBehavior, onZoneEvent, STATION_BEHAVIOR } from "./zones.js";
 
 /* -------------------------------------------- */
 /*  Initialisation                              */
@@ -31,6 +32,9 @@ Hooks.once("init", () => {
     default: {},
     onChange: () => refreshApps()
   });
+
+  // Comportement de Région « Poste de service » (comptoir, cuisine, tables)
+  registerStationBehavior();
 
   // API publique : game.modules.get("otium").api
   game.modules.get(MODULE_ID).api = {
@@ -123,6 +127,52 @@ Hooks.on("getSceneControlButtons", (controls) => {
     });
   }
 });
+
+/* -------------------------------------------- */
+/*  Postes de service : entrer dans une zone    */
+/* -------------------------------------------- */
+
+onZoneEvent(
+  // Entrée : derrière le comptoir on prend son poste, à une table on s'installe
+  async (zone, event) => {
+    const token = event.data?.token;
+    const actor = token?.actor;
+    const s = getService();
+    if (!actor || !s || (s.sceneId && token.parent?.id !== s.sceneId)) return refreshServiceApps();
+    const mover = !!event.user?.isSelf;
+    const player = actor.isOwner && !game.user.isGM;
+    if (zone.mode === "work") {
+      if (actor.type !== "character") return refreshServiceApps();
+      if (mover && !s.staff[actor.id]) await sendOp({ type: "join", actorId: actor.id });
+      if (player) openServiceServer(actor.id);
+    } else if (zone.mode === "table" && !s.staff[actor.id]) {
+      if (mover) await sendOp({ type: "sit", actorId: actor.id, table: zone.table });
+      if (player) openServiceClient(actor.id);
+    }
+    refreshServiceApps();
+  },
+  // Sortie d'une table sans commande en cours : la table se libère
+  async (zone, event) => {
+    const actor = event.data?.token?.actor;
+    if (actor && zone.mode === "table" && event.user?.isSelf && getService()) await sendOp({ type: "standUp", actorId: actor.id });
+    refreshServiceApps();
+  }
+);
+
+/** Redessine les fenêtres du service (le jeton a bougé : les postes accessibles changent). */
+function refreshServiceApps() {
+  for (const app of openApps) if (app.onServiceChanged && app.rendered !== false) app.render();
+}
+
+Hooks.on("updateToken", (token, changes) => {
+  if (!getService()) return;
+  if ("x" in changes || "y" in changes || "elevation" in changes) refreshServiceApps();
+});
+for (const hook of ["createRegionBehavior", "updateRegionBehavior", "deleteRegionBehavior"]) {
+  Hooks.on(hook, (behavior) => {
+    if (behavior.type === STATION_BEHAVIOR && getService()) refreshServiceApps();
+  });
+}
 
 /* -------------------------------------------- */
 /*  Synchronisation                             */

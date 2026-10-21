@@ -3,7 +3,7 @@
  * On joue le MJ ou un joueur, on commande, on regarde la bourse, le chat et les effets.
  */
 
-import { bench, setLanguage, users, actors, scene } from "./foundry-mock.js";
+import { bench, setLanguage, users, actors, scene, addZone, moveToken, tokenOf } from "./foundry-mock.js";
 import "../scripts/main.js";
 import { MODULE_ID } from "../scripts/constants.js";
 import { TEMPLATES } from "../scripts/presets.js";
@@ -102,6 +102,11 @@ function renderActors() {
           <dt>Ivresse</dt><dd class="num">${level}</dd>
         </dl>
         ${effects || statuses ? `<div class="chips">${effects}${statuses}</div>` : ""}
+        <label class="where">Jeton sur la scène
+          <select data-zone-actor="${a.id}" id="zone-${a.id}" ${mine ? "" : "disabled"}>
+            <option value="">hors des zones</option>
+            ${scene.regions.map((r) => `<option value="${r.id}" ${tokenOf(a).regions.has(r) ? "selected" : ""}>${esc(r.name)}</option>`).join("")}
+          </select></label>
         <div class="actor-actions">
           <button type="button" data-bench="money" ${game.user.isGM ? "" : "disabled"} title="Réservé au MJ">+10 po</button>
           <button type="button" data-bench="short" ${mine ? "" : "disabled"}>Repos court</button>
@@ -218,6 +223,12 @@ document.addEventListener("change", (event) => {
     bench.gmOnline = event.target.checked;
     toast("info", bench.gmOnline ? "Le MJ est connecté." : "Le MJ est déconnecté : les stocks limités ne peuvent plus être commandés.");
   }
+  if (event.target.dataset?.zoneActor) {
+    const actor = actors.find((a) => a.id === event.target.dataset.zoneActor);
+    const region = scene.regions.find((r) => r.id === event.target.value) ?? null;
+    moveToken(actor, region).catch((err) => bench.report(err));
+    return;
+  }
   if (event.target.name === "token-pick") {
     const actor = actors.find((a) => a.id === event.target.value);
     canvas.tokens.controlled = actor ? [{ actor }] : [];
@@ -239,6 +250,13 @@ async function start() {
   Hooks.callAll("init");
   Hooks.callAll("ready");
   Hooks.callAll("canvasReady");
+
+  // Postes de service posés par le MJ (Régions invisibles) : comptoir, cuisine et trois tables
+  addZone("Comptoir (comptoir, tireuse, caisse)", { mode: "work", actions: new Set(["pass", "tap", "cash"]), table: 1 });
+  addZone("Cuisine (cuisine, planche et cave)", { mode: "work", actions: new Set(["stove", "board"]), table: 1 });
+  for (const n of [1, 2, 3]) addZone(`Table ${n}`, { mode: "table", actions: new Set(), table: n });
+  // Thorin attend derrière le comptoir
+  tokenOf(actors[0]).regions.add(scene.regions[0]);
 
   // Le MJ prépare deux tavernes et ouvre la première sur la scène
   const village = await api().saveTavern(TEMPLATES.village());

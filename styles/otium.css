@@ -429,6 +429,27 @@
   font-weight: 600;
 }
 
+.otium-server .otium-position {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+/* Postes de service : poste hors de portée du jeton */
+.otium-server .otium-station.locked {
+  border-style: dashed;
+}
+
+.otium-server .otium-station.locked > :not(h4):not(.otium-lock) {
+  opacity: 0.5;
+}
+
+.otium-server .otium-lock {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--otium-accent);
+}
+
 /* Caisse */
 .otium-server .otium-cash {
   border: 2px solid var(--otium-accent);

@@ -27,6 +27,9 @@ export const STATION_DEFAULTS = Object.freeze({
   room: { station: "none", prepTime: 0 }
 });
 
+/** Ce qu'un poste de service (zone de Région) peut autoriser, dans l'ordre d'affichage. */
+export const ZONE_ACTIONS = ["pass", "tap", "stove", "board", "cash"];
+
 /** Repos proposé par une chambre. */
 export const RESTS = ["none", "short", "long"];
 

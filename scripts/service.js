@@ -14,6 +14,7 @@ import { MODULE_ID, SOCKET, t, warn, esc } from "./constants.js";
 import { sceneTavern, consumeStock } from "./store.js";
 import { priceToCp, walletToCp, pay, receive, cashGiven, formatCp } from "./currency.js";
 import { applyEffects } from "./effects.js";
+import { missingZone } from "./zones.js";
 
 /** Réglages du jeu (secondes, places…). */
 export const SERVICE = Object.freeze({
@@ -200,6 +201,7 @@ export async function openService({ tavern = sceneTavern(), tables = 6 } = {}) {
   runtime.state = {
     id: foundry.utils.randomID(),
     tavernId: tavern.id,
+    sceneId: canvas?.scene?.id ?? null,
     tavernName: tavern.name || t("Tavern.Unnamed"),
     effects: tavern.effects,
     running: false,
@@ -605,6 +607,10 @@ export async function applyOp(user, op) {
     if (!st) return notice(user, "Service.Notice.NotStaff");
     if (!FREE_WHEN_BUSY.has(op.type) && isBusy(st, s.t)) return notice(user, "Service.Notice.Busy", { name: st.name });
     if (!s.running && op.type !== "drop" && op.type !== "take") return notice(user, "Service.Notice.Paused");
+    // Postes de service (Régions) : l'action doit être faite depuis un poste qui l'autorise
+    const zoneOp = op.type === "serve" && op.uid !== undefined ? "take" : op.type;
+    const missing = missingZone(s.sceneId, st.id, zoneOp);
+    if (missing) return notice(user, "Service.Notice.NotHere", { name: st.name, zone: t(`Zone.${missing}`) });
   }
 
   const changed = await OPS[op.type]?.({ s, user, op, actor, st });
@@ -757,9 +763,17 @@ const OPS = {
 
   /* ---- Clients joueurs ---- */
   sit: ({ s, op, actor, user }) => {
-    if (s.tables.some((tb) => tb.reserved === actor.id)) return notice(user, "Service.Notice.AlreadySeated");
     const table = s.tables.find((tb) => tb.n === Number(op.table));
-    if (!table || table.ticket || table.reserved) return notice(user, "Service.Notice.TableTaken");
+    if (!table) return notice(user, "Service.Notice.NoSuchTable", { n: op.table });
+    if (table.reserved === actor.id) return false;
+    if (table.ticket || table.reserved) return notice(user, "Service.Notice.TableTaken");
+    const current = s.tables.find((tb) => tb.reserved === actor.id);
+    // Déjà attablé sans commande en cours : il change de table
+    if (current?.ticket) return notice(user, "Service.Notice.AlreadySeated");
+    if (current) {
+      current.reserved = null;
+      current.paidNote = null;
+    }
     table.reserved = actor.id;
     table.paidNote = null;
     log("Sat", { name: actor.name, n: table.n });

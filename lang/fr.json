@@ -289,7 +289,9 @@
         "TableTaken": "Cette table est prise.",
         "NotSeated": "Installez-vous d'abord à une table.",
         "ExactNoTip": "Compte juste !",
-        "NotActiveGM": "Seul le MJ actif (le premier MJ connecté) peut ouvrir un service."
+        "NotActiveGM": "Seul le MJ actif (le premier MJ connecté) peut ouvrir un service.",
+        "NotHere": "{name} doit être dans un poste « {zone} » pour ça.",
+        "NoSuchTable": "La table {n} n'existe pas dans ce service."
       },
       "Log": {
         "Opened": "Le service ouvre à {tavern}.",
@@ -310,7 +312,44 @@
         "LeftAngry": "Table {n} : {name} en a assez d'attendre et s'en va.",
         "LeftUnpaid": "Table {n} : {name} part sans payer ({total} perdus).",
         "Burnt": "{dish} a brûlé sur le feu {n}."
+      },
+      "Zone": {
+        "MoveTo": "Placez votre jeton dans un poste « {zone} ».",
+        "Here": "Poste : {zones}",
+        "Nowhere": "Votre jeton n'est dans aucun poste de service."
       }
+    },
+    "Zone": {
+      "pass": "Comptoir",
+      "tap": "Tireuse",
+      "stove": "Cuisine",
+      "board": "Planche et cave",
+      "cash": "Caisse"
+    },
+    "RegionBehavior": {
+      "Mode": {
+        "work": "Poste de travail",
+        "table": "Table"
+      },
+      "FIELDS": {
+        "mode": {
+          "label": "Type de zone",
+          "hint": "Poste de travail : un serveur ne peut faire que ce qui est coché ici, avec son jeton dans la zone. Table : un joueur qui y pose son jeton s'installe à cette table pendant un service."
+        },
+        "actions": {
+          "label": "Ce qu'on peut faire ici",
+          "hint": "Pour un poste de travail. Dès qu'une scène a un poste, chaque action du service doit se faire depuis un poste qui l'autorise."
+        },
+        "table": {
+          "label": "Numéro de table",
+          "hint": "Pour une zone Table : la table du service où le joueur s'installe."
+        }
+      }
+    }
+  },
+  "TYPES": {
+    "RegionBehavior": {
+      "otium.station": "Otium — Poste de service"
     }
   }
 }
