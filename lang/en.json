@@ -1,0 +1,101 @@
+{
+  "OTIUM": {
+    "Controls": {
+      "Menu": "Otium — Tavern menu",
+      "Taverns": "Otium — Manage taverns"
+    },
+    "Tavern": {
+      "Unnamed": "Unnamed tavern"
+    },
+    "Item": {
+      "Unnamed": "Unnamed item"
+    },
+    "Category": {
+      "drink": "Drinks",
+      "food": "Food",
+      "room": "Rooms",
+      "other": "Other"
+    },
+    "Rest": {
+      "none": "No rest",
+      "short": "Short rest",
+      "long": "Long rest"
+    },
+    "Alcohol": {
+      "0": "Non-alcoholic",
+      "1": "Light",
+      "2": "Strong",
+      "3": "Very strong"
+    },
+    "Template": {
+      "village": "Village inn",
+      "harbor": "Harbor tavern",
+      "noble": "Upscale establishment",
+      "empty": "Empty tavern"
+    },
+    "Menu": {
+      "Title": "Tavern menu",
+      "Buyer": "Ordering for",
+      "Wallet": "Purse",
+      "Order": "Order",
+      "SoldOut": "Sold out",
+      "Left": "{n} left",
+      "Empty": "The menu is empty.",
+      "Closed": "This tavern no longer exists.",
+      "NoTavern": "No tavern is open on this scene.",
+      "NoCharacter": "You don't own any character."
+    },
+    "Order": {
+      "Message": "{name} orders at {tavern}",
+      "Total": "Total",
+      "NoTavern": "This tavern no longer exists.",
+      "NoBuyer": "Pick a character you own.",
+      "Empty": "The basket is empty.",
+      "OutOfStock": "Not enough stock: {name}.",
+      "NotEnough": "{name} doesn't have enough money.",
+      "NoGM": "A GM must be connected to order an item with limited stock."
+    },
+    "Effects": {
+      "TipsyName": "Tipsy",
+      "DrunkName": "Drunk",
+      "SoberName": "Had a drink",
+      "DrunkDescription": "<p>Drunkenness level: {level}. Wears off on the next long rest.</p>",
+      "BecomesTipsy": "{name} is getting tipsy.",
+      "BecomesDrunk": "{name} is drunk (Poisoned until the next long rest).",
+      "TempHp": "Well fed, {name} gains {value} temporary hit points.",
+      "AlcoholTip": "Alcohol strength: adds up until the next long rest (3: tipsy, 6: drunk).",
+      "TempHpTip": "Temporary hit points granted by the meal."
+    },
+    "List": {
+      "Title": "Taverns",
+      "Hint": "Open a tavern on the active scene: players can then order on their own from the tankard icon in the Tokens group.",
+      "None": "No taverns yet. Create one from a template.",
+      "Items": "{n} items",
+      "Open": "Open on this scene",
+      "Close": "Close on this scene",
+      "Preview": "View menu",
+      "Edit": "Edit",
+      "Delete": "Delete",
+      "DeleteConfirm": "Delete the tavern \"{name}\"?",
+      "Create": "Create",
+      "Announce": "{tavern} opens its doors!",
+      "AnnounceHint": "Open the menu with the tankard icon in the Tokens group."
+    },
+    "Config": {
+      "Title": "Tavern: {name}",
+      "Missing": "This tavern no longer exists.",
+      "Name": "Name",
+      "Keeper": "Keeper",
+      "Description": "Description",
+      "Effects": "In-game effects",
+      "EffectsHint": "Drunkenness, temporary hit points from meals and rests from rooms. Uncheck so orders only pay and get announced.",
+      "Menu": "Menu",
+      "ItemName": "Item",
+      "Category": "Category",
+      "Price": "Price",
+      "Stock": "Stock",
+      "Effect": "Effect",
+      "RemoveItem": "Remove item"
+    }
+  }
+}

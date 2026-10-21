@@ -1,0 +1,254 @@
+/* Otium — styles des fenêtres et des messages */
+
+.otium {
+  --otium-accent: #c8923a;
+  --otium-accent-soft: rgba(200, 146, 58, 0.15);
+  --otium-danger: #c0392b;
+}
+
+.otium .otium-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.otium .hint {
+  opacity: 0.75;
+  font-size: 0.9em;
+  margin: 0;
+}
+
+.otium .otium-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.otium .otium-footer button {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+/* ---- Carte (joueurs) ---- */
+
+.otium-menu .otium-keeper {
+  margin: 0;
+  font-weight: bold;
+}
+
+.otium-menu .otium-desc {
+  margin: 0;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.otium-menu .otium-wallet,
+.otium-menu .otium-drunk {
+  margin: 0;
+}
+
+.otium-menu .otium-cat {
+  margin: 0.5rem 0 0;
+  border-bottom: 1px solid var(--otium-accent);
+  font-size: 1.05em;
+}
+
+.otium-menu .otium-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.otium-menu .otium-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0.25rem;
+  border-radius: 4px;
+}
+
+.otium-menu .otium-item.in-cart {
+  background: var(--otium-accent-soft);
+}
+
+.otium-menu .otium-item.sold-out {
+  opacity: 0.5;
+}
+
+.otium-menu .otium-item-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.otium-menu .otium-tag,
+.otium-menu .otium-stock {
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+.otium-menu .otium-price {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.otium-menu .otium-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.otium-menu .otium-qty button {
+  width: 1.6rem;
+  height: 1.6rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.otium-menu .otium-qty span {
+  min-width: 1.2rem;
+  text-align: center;
+}
+
+.otium-menu .otium-total.too-much,
+.otium-menu .otium-warning {
+  color: var(--otium-danger);
+}
+
+.otium-menu .otium-warning {
+  margin: 0;
+}
+
+/* ---- Liste des tavernes (MJ) ---- */
+
+.otium-list .otium-taverns {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.otium-list .otium-tavern {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+.otium-list .otium-tavern.active {
+  border-color: var(--otium-accent);
+  background: var(--otium-accent-soft);
+}
+
+.otium-list .otium-tavern-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.otium-list .otium-tavern-actions {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.otium-list .otium-tavern-actions button.active {
+  color: var(--otium-accent);
+}
+
+.otium-list .otium-footer select {
+  flex: 1;
+}
+
+/* ---- Réglages d'une taverne (MJ) ---- */
+
+.otium-config .otium-menu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.otium-config .otium-menu-table th {
+  text-align: left;
+  font-size: 0.85em;
+}
+
+.otium-config .otium-menu-table td {
+  padding: 0.15rem 0.2rem;
+  vertical-align: middle;
+}
+
+.otium-config .otium-price-cell {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.otium-config .otium-price-cell input {
+  width: 4.5rem;
+}
+
+.otium-config input[name$=".stock"],
+.otium-config input[name$=".tempHp"] {
+  width: 4rem;
+}
+
+.otium-config .otium-row-actions {
+  white-space: nowrap;
+}
+
+/* Un seul champ d'effet visible, selon la catégorie de l'article */
+.otium-config .otium-fx > * {
+  display: none;
+}
+
+.otium-config .otium-row[data-category="drink"] .fx-drink,
+.otium-config .otium-row[data-category="food"] .fx-food,
+.otium-config .otium-row[data-category="room"] .fx-room,
+.otium-config .otium-row[data-category="other"] .fx-other {
+  display: inline-block;
+}
+
+.otium-config .otium-menu-table.no-effects .otium-fx {
+  opacity: 0.4;
+}
+
+.otium-config .otium-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+
+.otium-config .otium-add button {
+  flex: 1 1 auto;
+}
+
+/* ---- Messages du chat ---- */
+
+.otium-chat p {
+  margin: 0.2rem 0;
+}
+
+.otium-chat .otium-chat-head {
+  font-weight: bold;
+}
+
+.otium-chat .otium-chat-lines {
+  margin: 0.2rem 0;
+  padding-left: 1rem;
+}
+
+.otium-chat .otium-chat-lines .otium-price {
+  float: right;
+  opacity: 0.8;
+}
+
+.otium-chat .otium-chat-note {
+  font-style: italic;
+}

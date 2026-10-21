@@ -1,0 +1,101 @@
+{
+  "OTIUM": {
+    "Controls": {
+      "Menu": "Otium — Carte de la taverne",
+      "Taverns": "Otium — Gérer les tavernes"
+    },
+    "Tavern": {
+      "Unnamed": "Taverne sans nom"
+    },
+    "Item": {
+      "Unnamed": "Article sans nom"
+    },
+    "Category": {
+      "drink": "Boissons",
+      "food": "Plats",
+      "room": "Chambres",
+      "other": "Divers"
+    },
+    "Rest": {
+      "none": "Aucun repos",
+      "short": "Repos court",
+      "long": "Repos long"
+    },
+    "Alcohol": {
+      "0": "Sans alcool",
+      "1": "Léger",
+      "2": "Fort",
+      "3": "Très fort"
+    },
+    "Template": {
+      "village": "Auberge de village",
+      "harbor": "Taverne de port",
+      "noble": "Établissement chic",
+      "empty": "Taverne vide"
+    },
+    "Menu": {
+      "Title": "Carte de la taverne",
+      "Buyer": "Commande pour",
+      "Wallet": "Bourse",
+      "Order": "Commander",
+      "SoldOut": "Épuisé",
+      "Left": "Reste {n}",
+      "Empty": "La carte est vide.",
+      "Closed": "Cette taverne n'existe plus.",
+      "NoTavern": "Aucune taverne n'est ouverte sur cette scène.",
+      "NoCharacter": "Aucun personnage à vous."
+    },
+    "Order": {
+      "Message": "{name} passe commande à {tavern}",
+      "Total": "Total",
+      "NoTavern": "Cette taverne n'existe plus.",
+      "NoBuyer": "Choisissez un personnage qui vous appartient.",
+      "Empty": "Le panier est vide.",
+      "OutOfStock": "Plus assez de stock : {name}.",
+      "NotEnough": "{name} n'a pas assez d'argent.",
+      "NoGM": "Un MJ doit être connecté pour commander un article en stock limité."
+    },
+    "Effects": {
+      "TipsyName": "Éméché",
+      "DrunkName": "Ivre",
+      "SoberName": "A bu un verre",
+      "DrunkDescription": "<p>Niveau d'ivresse : {level}. Disparaît au prochain repos long.</p>",
+      "BecomesTipsy": "{name} commence à être éméché.",
+      "BecomesDrunk": "{name} est ivre (Empoisonné jusqu'au prochain repos long).",
+      "TempHp": "Bien nourri, {name} gagne {value} points de vie temporaires.",
+      "AlcoholTip": "Degré d'alcool : s'additionne jusqu'au prochain repos long (3 : éméché, 6 : ivre).",
+      "TempHpTip": "Points de vie temporaires accordés par le repas."
+    },
+    "List": {
+      "Title": "Tavernes",
+      "Hint": "Ouvrez une taverne sur la scène active : les joueurs peuvent alors commander seuls depuis l'icône de chope, dans le groupe Jetons.",
+      "None": "Aucune taverne pour l'instant. Créez-en une à partir d'un modèle.",
+      "Items": "{n} articles",
+      "Open": "Ouvrir sur cette scène",
+      "Close": "Fermer sur cette scène",
+      "Preview": "Voir la carte",
+      "Edit": "Modifier",
+      "Delete": "Supprimer",
+      "DeleteConfirm": "Supprimer la taverne « {name} » ?",
+      "Create": "Créer",
+      "Announce": "{tavern} ouvre ses portes !",
+      "AnnounceHint": "Ouvrez la carte avec l'icône de chope, dans le groupe Jetons."
+    },
+    "Config": {
+      "Title": "Taverne : {name}",
+      "Missing": "Cette taverne n'existe plus.",
+      "Name": "Nom",
+      "Keeper": "Tenancier",
+      "Description": "Description",
+      "Effects": "Effets en jeu",
+      "EffectsHint": "Ivresse, points de vie temporaires des repas et repos des chambres. Décochez pour que les commandes ne fassent que payer et s'annoncer.",
+      "Menu": "Carte",
+      "ItemName": "Article",
+      "Category": "Catégorie",
+      "Price": "Prix",
+      "Stock": "Stock",
+      "Effect": "Effet",
+      "RemoveItem": "Retirer l'article"
+    }
+  }
+}
