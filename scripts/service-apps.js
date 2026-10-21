@@ -16,7 +16,8 @@ import { buyerCandidates, defaultBuyer } from "./order.js";
 import { zoneActions } from "./zones.js";
 import {
   SERVICE, RUSH, getService, getSummary, serviceNow, onServiceChange, sendOp,
-  openService, payTips, dismissSummary, menuItem, ticketTotal, isBusy
+  openService, payTips, dismissSummary, menuItem, ticketTotal, isBusy,
+  TIERS, tierOf, ticketElapsed, formatTime, averageTime
 } from "./service.js";
 
 const { DialogV2 } = foundry.applications.api;
@@ -31,10 +32,16 @@ function bar(kind, id, cls = "") {
 
 function barState(s, kind, id, now) {
   switch (kind) {
-    case "ticket": {
+    case "tier": {
+      // Temps restant avant de descendre au palier de pourboire suivant
       const tk = s.tickets[id];
-      if (!tk || tk.deadline === null) return { frac: 1, colored: false };
-      return { frac: (tk.deadline - now) / tk.patienceMax, colored: true };
+      if (!tk) return { frac: 0 };
+      const ratio = ticketElapsed(tk, now) / Math.max(1, tk.target);
+      const i = TIERS.findIndex((x) => ratio <= x.max);
+      const tier = TIERS[i] ?? TIERS[TIERS.length - 1];
+      if (tier.max === Infinity) return { frac: 0, tier: tier.key };
+      const prev = i > 0 ? TIERS[i - 1].max : 0;
+      return { frac: 1 - (ratio - prev) / (tier.max - prev), tier: tier.key };
     }
     case "cook": {
       const slot = s.stove[id];
@@ -105,17 +112,39 @@ class ServiceApp extends OtiumApp {
     if (!s || !root) return;
     const now = serviceNow();
     for (const el of root.querySelectorAll("[data-otium-bar]")) {
-      const { frac, colored } = barState(s, el.dataset.otiumBar, el.dataset.id, now);
+      const { frac, colored, tier } = barState(s, el.dataset.otiumBar, el.dataset.id, now);
       const f = Math.min(1, Math.max(0, frac || 0));
       el.firstElementChild.style.width = `${f * 100}%`;
       if (colored) {
         el.classList.toggle("mid", f <= 0.5 && f > 0.25);
         el.classList.toggle("low", f <= 0.25);
       }
+      if (tier) for (const x of TIERS) el.classList.toggle(`tier-${x.key}`, x.key === tier);
+    }
+    // Chronomètres des commandes : temps écoulé et palier de pourboire
+    for (const el of root.querySelectorAll("[data-otium-timer]")) {
+      const tk = s.tickets[el.dataset.otiumTimer];
+      if (!tk) continue;
+      const elapsed = ticketElapsed(tk, now);
+      const tier = tk.tier ?? tierOf(elapsed, tk.target).key;
+      el.querySelector("b").textContent = formatTime(elapsed);
+      el.querySelector(".otium-tier").textContent = L(`Tier.${tier}`);
+      for (const x of TIERS) el.classList.toggle(`tier-${x.key}`, x.key === tier);
     }
     const c = root.querySelector("[data-otium-clock]");
     if (c) c.textContent = clock(now);
   }
+}
+
+/** Chronomètre d'une commande : il part de 0, et le palier dit le pourboire en jeu. */
+function timerHtml(ticket) {
+  const elapsed = ticketElapsed(ticket);
+  const tier = ticket.tier ?? tierOf(elapsed, ticket.target).key;
+  return `
+    <div class="otium-timer tier-${tier}" data-otium-timer="${esc(ticket.id)}" data-tooltip="${esc(L("Tier.Hint"))}">
+      <i class="fa-solid fa-stopwatch"></i> <b>${formatTime(elapsed)}</b> <span class="otium-tier">${L(`Tier.${tier}`)}</span>
+    </div>
+    ${ticket.phase === "order" ? bar("tier", ticket.id) : ""}`;
 }
 
 function ticketChips(s, ticket) {
@@ -301,7 +330,7 @@ export class ServiceServerApp extends ServiceApp {
             <header><strong>${L("Table", { n: tb.n })}</strong><span class="hint">${bill ? L("Server.Bill") : ticket.kind === "player" ? L("Server.Player") : ""}</span></header>
             <span class="otium-who" title="${esc(ticket.name)}">${ticket.calling ? '<i class="fa-solid fa-bell"></i> ' : ""}${esc(ticket.name)}</span>
             <div class="otium-chips">${ticketChips(s, ticket)}</div>
-            ${ticket.deadline === null ? `<span class="hint">${L("Server.NoRush")}</span>` : bar("ticket", ticket.id)}
+            ${timerHtml(ticket)}
             <div class="otium-table-actions">${action}</div>
           </article>`;
       })
@@ -419,11 +448,12 @@ export class ServiceServerApp extends ServiceApp {
             count++;
           }
         }
-        const urgent = ticket.deadline !== null && (ticket.deadline - serviceNow()) / ticket.patienceMax < 0.35;
-        return { n: tb.n, count, urgent };
+        // Les tables qui ont déjà perdu le meilleur pourboire passent en premier
+        const ratio = ticketElapsed(ticket) / Math.max(1, ticket.target);
+        return { n: tb.n, count, urgent: ratio > 1, ratio };
       })
       .filter((x) => x.count > 0)
-      .sort((a, b) => b.urgent - a.urgent || b.count - a.count);
+      .sort((a, b) => b.ratio - a.ratio || b.count - a.count);
 
     let serveBar;
     if (!st.tray.length) serveBar = `<p class="hint">${L("Counter.EmptyTray")}</p>`;
@@ -693,7 +723,7 @@ export class ServiceGMApp extends ServiceApp {
         const served = ticket.items.filter((it) => it.served).length;
         const state = ticket.phase === "bill" ? L("GM.WaitingBill") : L("GM.ServedCount", { served, total: ticket.items.length });
         return `<tr><td>${tb.n}</td><td>${ticket.calling ? '<i class="fa-solid fa-bell"></i> ' : ""}${esc(ticket.name)}</td><td>${state}</td>
-          <td>${ticket.deadline === null ? `<span class="hint">${L("Server.Player")}</span>` : bar("ticket", ticket.id)}</td></tr>`;
+          <td>${timerHtml(ticket)}</td></tr>`;
       })
       .join("");
 
@@ -732,7 +762,7 @@ export class ServiceGMApp extends ServiceApp {
       </div>
       <div class="otium-stats">
         <div><span class="otium-label">${L("Stats.Served")}</span><b>${st.served}</b></div>
-        <div><span class="otium-label">${L("Stats.Left")}</span><b>${st.failed + st.unpaid}</b></div>
+        <div><span class="otium-label">${L("Stats.AvgTime")}</span><b>${averageTime(st)}</b></div>
         <div><span class="otium-label">${L("Stats.Revenue")}</span><b>${formatCp(st.revenue)}</b></div>
         <div><span class="otium-label">${L("Stats.Tips")}</span><b>${formatCp(st.tips)}</b></div>
         <div><span class="otium-label">${L("Stats.Satisfaction")}</span><b>${sat} %</b></div>
@@ -765,7 +795,7 @@ export class ServiceGMApp extends ServiceApp {
             <div><span class="otium-label">${L("Stats.Tips")}</span><b>${formatCp(st.tips)}</b></div>
             <div><span class="otium-label">${L("Stats.Satisfaction")}</span><b>${sat} %</b></div>
           </div>
-          <p>${L("Summary.Line", { served: st.served, failed: st.failed, unpaid: st.unpaid })} ${L("Summary.Extra", { perfect: st.perfect, burnt: st.burnt })}</p>
+          <p>${L("Summary.Line", { served: st.served, avg: averageTime(st) })} ${L("Summary.Extra", { lightning: st.lightning, perfect: st.perfect, burnt: st.burnt })}</p>
           ${summary.staff.length
             ? `<p>${L("Summary.Share", { names: summary.staff.map((x) => esc(x.name)).join(", "), share: formatCp(summary.share) })}</p>`
             : `<p class="hint">${L("Summary.NoStaff")}</p>`}
@@ -908,6 +938,7 @@ export class ServiceClientApp extends ServiceApp {
     return `${head}
       <p class="otium-label">${L("Table", { n: table.n })} · ${L("Client.YourOrder")}</p>
       <div class="otium-chips">${ticketChips(s, ticket)}</div>
+      ${timerHtml(ticket)}
       <ul class="otium-steps">${steps.map(([label, done, on]) => `<li class="${done ? "done" : on ? "on" : ""}"><span class="otium-dot"></span>${esc(label)}</li>`).join("")}</ul>
       ${ticket.phase === "bill" ? `<p class="notice">${L("Client.BillHint", { total: formatCp(ticketTotal(s, ticket)) })}</p>` : ""}
       <div class="otium-row"><button type="button" data-action="call" ${ticket.calling ? "disabled" : ""}><i class="fa-solid fa-bell"></i> ${L(ticket.calling ? "Client.Called" : "Client.Call")}</button></div>`;

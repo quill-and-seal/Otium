@@ -377,6 +377,56 @@
   background: var(--otium-danger);
 }
 
+/* Chronomètre des commandes et paliers de pourboire */
+.otium-service .otium-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.otium-service .otium-timer b {
+  font-variant-numeric: tabular-nums;
+}
+
+.otium-service .otium-tier {
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--otium-panel);
+}
+
+.otium-service .otium-timer.tier-lightning .otium-tier {
+  background: var(--otium-accent);
+  color: #fff;
+}
+
+.otium-service .otium-timer.tier-fast .otium-tier {
+  background: var(--otium-ok-soft);
+  color: var(--otium-ok);
+}
+
+.otium-service .otium-timer.tier-ok .otium-tier {
+  color: var(--otium-warn);
+}
+
+.otium-service .otium-timer.tier-slow .otium-tier {
+  color: var(--otium-danger);
+}
+
+.otium-service .otium-bar.tier-lightning > i {
+  background: var(--otium-accent);
+}
+
+.otium-service .otium-bar.tier-fast > i {
+  background: var(--otium-ok);
+}
+
+.otium-service .otium-bar.tier-ok > i {
+  background: var(--otium-warn);
+}
+
 /* Pastilles */
 .otium-service .otium-chips {
   display: flex;

@@ -201,7 +201,7 @@
         "Paused": "en pause",
         "NotStarted": "pas encore lancé",
         "Rush": "Affluence",
-        "Patience": "Patience",
+        "Patience": "Temps visé",
         "Events": "Événements",
         "AddClient": "Faire entrer un client",
         "AddHurry": "Client pressé",
@@ -209,7 +209,7 @@
         "Table": "Table",
         "Client": "Client",
         "State": "État",
-        "PatienceCol": "Patience",
+        "PatienceCol": "Chrono",
         "WaitingBill": "attend l'addition",
         "ServedCount": "{served}/{total} servis",
         "Staff": "Personnel",
@@ -232,12 +232,13 @@
         "Left": "Partis",
         "Revenue": "Recette",
         "Tips": "Pourboires",
-        "Satisfaction": "Satisfaction"
+        "Satisfaction": "Satisfaction",
+        "AvgTime": "Temps moyen"
       },
       "Summary": {
         "Title": "Bilan du service — {tavern}",
-        "Line": "{served} commandes servies, {failed} clients partis furieux, {unpaid} partis sans payer.",
-        "Extra": "{perfect} chopes parfaites, {burnt} plats brûlés.",
+        "Line": "{served} commandes servies, en {avg} en moyenne.",
+        "Extra": "{lightning} services éclair, {perfect} chopes parfaites, {burnt} plats brûlés.",
         "Money": "Recette : {revenue} · pourboires : {tips}.",
         "Share": "Pourboires à partager entre {names} : {share} chacun.",
         "NoStaff": "Personne n'était en poste.",
@@ -251,7 +252,7 @@
         "ChooseTable": "Choisissez une table libre pour vous installer.",
         "Menu": "la carte",
         "StandUp": "Quitter la table",
-        "Hint": "Pendant un service, votre commande part en salle : ce sont les serveurs qui la préparent et vous l'apportent.",
+        "Hint": "Pendant un service, votre commande part en salle : ce sont les serveurs qui la préparent et vous l'apportent. Le chrono montre leur rapidité.",
         "YourOrder": "votre commande",
         "StepTaken": "Commande prise",
         "StepServing": "Service en cours ({served}/{total})",
@@ -303,7 +304,7 @@
         "Ordered": "Table {n} : {name} commande {items}.",
         "Called": "Table {n} : {name} appelle un serveur.",
         "ServedSome": "{staff} sert {count} article(s) à la table {n}.",
-        "ServedAll": "{staff} a servi toute la commande de la table {n}.",
+        "ServedAll": "{staff} a servi toute la commande de la table {n} en {time} ({tier}).",
         "Paid": "Table {n} payée : {total}.",
         "PaidTip": "Table {n} payée : {total}, pourboire {tip}.",
         "ChangeShort": "{staff} n'a pas rendu assez de monnaie à la table {n}.",
@@ -317,6 +318,13 @@
         "MoveTo": "Placez votre jeton dans un poste « {zone} ».",
         "Here": "Poste : {zones}",
         "Nowhere": "Votre jeton n'est dans aucun poste de service."
+      },
+      "Tier": {
+        "lightning": "Éclair",
+        "fast": "Rapide",
+        "ok": "Correct",
+        "slow": "Lent",
+        "Hint": "Le chrono part de 0 à la commande et s'arrête quand tout est servi. Éclair : gros pourboire, Rapide : bon, Correct : petit, Lent : rien. La jauge montre le temps avant le palier suivant."
       }
     },
     "Zone": {

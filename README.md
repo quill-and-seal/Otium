@@ -7,7 +7,7 @@ Le temps libre de vos personnages pour **Foundry VTT v14** (système **dnd5e**).
 La première scène, c'est **la taverne**, avec deux façons de la jouer :
 
 - **Clientèle** : les joueurs ouvrent la carte et commandent eux-mêmes. Paiement, monnaie rendue, stock, annonce dans le chat et, si le MJ le veut, effets en jeu : tout est automatique.
-- **Service** : les joueurs sont le personnel. Ils tirent les bières, cuisinent, servent les tables et encaissent, en temps réel, pendant que le MJ règle l'affluence.
+- **Service** : les joueurs sont le personnel. Ils tirent les bières, cuisinent, servent les tables et encaissent, en temps réel et chrono en main, pendant que le MJ règle l'affluence.
 
 Un module de l'atelier [Quill & Seal](https://github.com/quill-and-seal).
 
@@ -72,7 +72,18 @@ Sans effets, une commande se contente de payer et de s'annoncer.
 
 ## Mode Service : les joueurs tiennent la taverne
 
-Pendant un service, les personnages sont le personnel. Les clients entrent, commandent et s'impatientent : il faut préparer, servir et encaisser avant qu'ils partent.
+Pendant un service, les personnages sont le personnel. Les clients entrent et commandent : il faut préparer, servir et encaisser, le plus vite possible.
+
+Chaque commande a un **chronomètre** qui part de 0 et s'arrête quand tout est servi. Plus c'est rapide, plus le pourboire est gros :
+
+| Palier | Pourboire |
+| --- | --- |
+| **Éclair** | gros |
+| **Rapide** | bon |
+| **Correct** | petit |
+| **Lent** | aucun |
+
+Le temps visé dépend des plats commandés (un ragoût prend plus de temps qu'une bière). Une jauge sous le chrono montre le temps restant avant de descendre au palier suivant. Un client pressé vise plus court, mais donne plus s'il est servi à temps.
 
 ### Lancer un service (MJ)
 
@@ -83,11 +94,11 @@ Pendant un service, les personnages sont le personnel. Les clients entrent, comm
 Pendant le service, le MJ peut :
 
 - mettre en **pause** ou accélérer (**×2**) ;
-- régler l'**affluence** (calme, normale, coup de feu) et la **patience** des clients ;
+- régler l'**affluence** (calme, normale, coup de feu) et le **temps visé** (plus long pour des joueurs débutants, plus court pour corser) ;
 - faire entrer un client, un **client pressé** ou une **grande tablée** ;
 - suivre la salle, le personnel et le journal en direct.
 
-**Terminer le service** affiche le bilan (recette, pourboires, satisfaction). **Verser les pourboires** les répartit sur les fiches des serveurs, et les stocks consommés sont retirés de la taverne.
+**Terminer le service** affiche le bilan (recette, pourboires, temps moyen, satisfaction). **Verser les pourboires** les répartit sur les fiches des serveurs, et les stocks consommés sont retirés de la taverne.
 
 ### Servir (joueurs)
 
@@ -96,12 +107,12 @@ Ouvre l'outil **Service : prendre son poste**, choisis ton personnage, puis :
 - **Tireuse** : maintiens le bouton et relâche dans la zone verte. Une chope parfaite rapporte un meilleur pourboire ; trop longtemps et ça déborde.
 - **Cuisine** : trois feux. Un plat prêt doit être sorti vite, sinon il brûle.
 - **Planche et cave** : pain, vin… Ton personnage est occupé pendant la préparation.
-- **Comptoir et plateau** : clique un plat pour le charger (trois places), puis **Servir** sur une table. Le plateau propose directement les tables qui attendent ce que tu portes. Tout se fait aussi en glisser-déposer.
+- **Comptoir et plateau** : clique un plat pour le charger (trois places), puis **Servir** sur une table. Le plateau propose directement les tables qui attendent ce que tu portes, celles qui attendent depuis le plus longtemps en premier. Tout se fait aussi en glisser-déposer.
 - **Encaisser** : rends la monnaie juste. Trop peu, pas de pourboire ; trop, la taverne perd la différence.
 
 ### S'attabler (joueurs clients)
 
-Pendant un service, la **chope** installe le joueur à une table : sa commande part chez les serveurs au lieu de passer toute seule. Il suit l'avancement, peut **appeler un serveur**, et paie quand on vient encaisser.
+Pendant un service, la **chope** installe le joueur à une table : sa commande part chez les serveurs au lieu de passer toute seule. Il suit l'avancement et le chrono, peut **appeler un serveur**, et paie quand on vient encaisser.
 
 ### Préparer les articles pour le service (MJ)
 

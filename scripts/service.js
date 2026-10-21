@@ -26,12 +26,34 @@ export const SERVICE = Object.freeze({
   burn: 9,            // temps pour sortir un plat prêt avant qu'il brûle
   perfectTakeOut: 2,  // sorti en moins de 2 s : plat parfait
   walk: 1.6,          // aller servir une table
-  bill: 35,           // patience d'un client qui attend l'addition
   tapSpeed: 55,       // remplissage de la chope (% par seconde)
   tapMin: 55,         // en dessous : trop peu, on recommence
   tapPerfect: [75, 90],
   logSize: 40
 });
+
+/**
+ * Chronomètre des commandes : il part de 0 quand le client commande et s'arrête quand tout est servi.
+ * Plus c'est rapide, plus le pourboire est gros. Les paliers se comptent en multiples du « temps visé »
+ * de la commande (préparation des plats + un peu de marche), réglable par le MJ.
+ */
+export const TIERS = Object.freeze([
+  { key: "lightning", max: 1, tip: 0.4 },
+  { key: "fast", max: 1.5, tip: 0.25 },
+  { key: "ok", max: 2.5, tip: 0.1 },
+  { key: "slow", max: Infinity, tip: 0 }
+]);
+
+/** Palier atteint pour un temps donné. */
+export function tierOf(elapsed, target) {
+  const ratio = elapsed / Math.max(1, target);
+  return TIERS.find((tier) => ratio <= tier.max) ?? TIERS[TIERS.length - 1];
+}
+
+/** Temps écoulé sur une commande (figé une fois tout servi). */
+export function ticketElapsed(ticket, now = serviceNow()) {
+  return ticket.serveTime ?? Math.max(0, now - ticket.created);
+}
 
 /** Délai moyen entre deux clients selon l'affluence. */
 export const RUSH = Object.freeze({ calm: 38, normal: 22, rush: 11 });
@@ -89,6 +111,17 @@ function notifyLocal() {
       warn(err);
     }
   }
+}
+
+/** « 1:05 » */
+export function formatTime(seconds) {
+  const s = Math.max(0, Math.floor(seconds));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+/** Temps moyen de service d'une liste de stats. */
+export function averageTime(stats) {
+  return stats.served ? formatTime(stats.totalTime / stats.served) : "—";
 }
 
 export function menuItem(s, id) {
@@ -219,7 +252,7 @@ export async function openService({ tavern = sceneTavern(), tables = 6 } = {}) {
     board: Array(SERVICE.boards).fill(null),
     pass: [],
     staff: {},
-    stats: { served: 0, failed: 0, unpaid: 0, revenue: 0, tips: 0, happy: 0, finished: 0, perfect: 0, burnt: 0, spilled: 0 },
+    stats: { served: 0, revenue: 0, tips: 0, happy: 0, finished: 0, perfect: 0, burnt: 0, spilled: 0, totalTime: 0, lightning: 0 },
     log: []
   };
   runtime.base = { t: 0, at: performance.now() };
@@ -269,7 +302,7 @@ async function endService() {
   const st = runtime.summary.stats;
   await ChatMessage.create({
     content: `<div class="otium-chat"><p class="otium-chat-head"><i class="fa-solid fa-door-closed"></i> ${t("Service.Chat.Closed", { tavern: esc(s.tavernName) })}</p>
-      <p>${t("Service.Summary.Line", { served: st.served, failed: st.failed, unpaid: st.unpaid })}</p>
+      <p>${t("Service.Summary.Line", { served: st.served, avg: averageTime(st) })}</p>
       <p>${t("Service.Summary.Money", { revenue: formatCp(st.revenue), tips: formatCp(st.tips) })}</p></div>`,
     flags: { [MODULE_ID]: { service: true } }
   });
@@ -339,13 +372,6 @@ function step() {
     }
   });
 
-  for (const ticket of Object.values(s.tickets)) {
-    if (ticket.deadline !== null && s.t >= ticket.deadline) {
-      leave(ticket);
-      dirty = true;
-    }
-  }
-
   if (s.t >= s.nextArrival) {
     if (spawn()) dirty = true;
     s.nextArrival = s.t + (0.6 + Math.random() * 0.8) * RUSH[s.rush];
@@ -379,7 +405,12 @@ function consume(s, items) {
 function newTicket(table, { name, kind = "npc", actorId = null, items, hurry = false }) {
   const s = runtime.state;
   const id = `T${s.seq++}`;
-  const patienceMax = kind === "player" ? null : (55 + 14 * items.length) * s.patienceMul * (hurry ? 0.5 : 1);
+  // Temps visé : préparation de chaque article, un peu de marche, puis la marge réglée par le MJ
+  const prep = items.reduce((sum, m) => {
+    const item = menuItem(s, m);
+    return sum + (item?.station === "tap" ? 5 : (item?.time ?? 4) + 3);
+  }, 0);
+  const target = Math.round((12 + prep) * s.patienceMul * (hurry ? 0.6 : 1));
   s.tickets[id] = {
     id,
     table: table.n,
@@ -389,10 +420,10 @@ function newTicket(table, { name, kind = "npc", actorId = null, items, hurry = f
     hurry,
     items: items.map((m) => ({ m, served: false, perfect: false })),
     phase: "order",
-    patienceMax,
-    deadline: patienceMax === null ? null : s.t + patienceMax,
+    target,
     created: s.t,
-    serveFrac: 1,
+    serveTime: null,
+    tier: null,
     calling: false,
     cashier: null
   };
@@ -435,21 +466,6 @@ function closeTicket(ticket) {
   delete s.tickets[ticket.id];
 }
 
-function leave(ticket) {
-  const s = runtime.state;
-  const unpaid = ticket.phase === "bill";
-  s.stats.finished++;
-  if (unpaid) {
-    s.stats.unpaid++;
-    log("LeftUnpaid", { n: ticket.table, name: ticket.name, total: formatCp(ticketTotal(s, ticket)) }, "bad");
-  } else {
-    s.stats.failed++;
-    log("LeftAngry", { n: ticket.table, name: ticket.name }, "bad");
-  }
-  if (ticket.cashier && s.staff[ticket.cashier]) s.staff[ticket.cashier].busy = null;
-  closeTicket(ticket);
-}
-
 /* ============================================ */
 /*  Serveurs                                    */
 /* ============================================ */
@@ -489,12 +505,13 @@ function serveTable(st, n) {
   if (!count) return;
   ticket.calling = false;
   if (ticket.items.every((it) => it.served)) {
-    ticket.serveFrac = ticket.deadline === null ? 1 : Math.max(0, (ticket.deadline - s.t) / ticket.patienceMax);
+    ticket.serveTime = s.t - ticket.created;
+    ticket.tier = tierOf(ticket.serveTime, ticket.target).key;
     ticket.phase = "bill";
-    ticket.patienceMax = ticket.kind === "player" ? null : SERVICE.bill * s.patienceMul;
-    ticket.deadline = ticket.patienceMax === null ? null : s.t + ticket.patienceMax;
     s.stats.served++;
-    log("ServedAll", { staff: st.name, n }, "good");
+    s.stats.totalTime += ticket.serveTime;
+    if (ticket.tier === "lightning") s.stats.lightning++;
+    log("ServedAll", { staff: st.name, n, time: formatTime(ticket.serveTime), tier: t(`Service.Tier.${ticket.tier}`) }, "good");
   } else {
     log("ServedSome", { staff: st.name, n, count });
   }
@@ -505,8 +522,10 @@ async function settle(st, ticket, change) {
   const s = runtime.state;
   const due = ticketTotal(s, ticket);
   const expected = cashGiven(due) - due;
-  let tip = Math.round(due * (0.1 + 0.3 * ticket.serveFrac)) + ticket.items.filter((it) => it.perfect).length;
-  let happy = ticket.serveFrac >= 0.4;
+  // Pourboire selon la rapidité du service (un client pressé donne plus s'il est servi vite)
+  const tier = TIERS.find((x) => x.key === ticket.tier) ?? TIERS[TIERS.length - 1];
+  let tip = Math.round(due * tier.tip * (ticket.hurry ? 1.5 : 1)) + ticket.items.filter((it) => it.perfect).length;
+  let happy = tier.key !== "slow";
   let revenue = due;
   let result = "Exact";
 

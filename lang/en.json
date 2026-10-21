@@ -201,7 +201,7 @@
         "Paused": "paused",
         "NotStarted": "not started yet",
         "Rush": "Crowd",
-        "Patience": "Patience",
+        "Patience": "Target time",
         "Events": "Events",
         "AddClient": "Let a customer in",
         "AddHurry": "Customer in a hurry",
@@ -209,7 +209,7 @@
         "Table": "Table",
         "Client": "Customer",
         "State": "State",
-        "PatienceCol": "Patience",
+        "PatienceCol": "Stopwatch",
         "WaitingBill": "waiting for the bill",
         "ServedCount": "{served}/{total} served",
         "Staff": "Staff",
@@ -232,12 +232,13 @@
         "Left": "Left",
         "Revenue": "Takings",
         "Tips": "Tips",
-        "Satisfaction": "Satisfaction"
+        "Satisfaction": "Satisfaction",
+        "AvgTime": "Average time"
       },
       "Summary": {
         "Title": "Service summary — {tavern}",
-        "Line": "{served} orders served, {failed} customers left angry, {unpaid} left without paying.",
-        "Extra": "{perfect} perfect pints, {burnt} burnt dishes.",
+        "Line": "{served} orders served, {avg} on average.",
+        "Extra": "{lightning} lightning services, {perfect} perfect pints, {burnt} burnt dishes.",
         "Money": "Takings: {revenue} · tips: {tips}.",
         "Share": "Tips to split between {names}: {share} each.",
         "NoStaff": "Nobody was on duty.",
@@ -251,7 +252,7 @@
         "ChooseTable": "Pick a free table to sit down.",
         "Menu": "the menu",
         "StandUp": "Leave the table",
-        "Hint": "During a service, your order goes to the room: the waiters prepare it and bring it to you.",
+        "Hint": "During a service, your order goes to the room: the waiters prepare it and bring it to you. The stopwatch shows how fast they are.",
         "YourOrder": "your order",
         "StepTaken": "Order taken",
         "StepServing": "Being served ({served}/{total})",
@@ -303,7 +304,7 @@
         "Ordered": "Table {n}: {name} orders {items}.",
         "Called": "Table {n}: {name} calls a waiter.",
         "ServedSome": "{staff} serves {count} item(s) to table {n}.",
-        "ServedAll": "{staff} served table {n}'s whole order.",
+        "ServedAll": "{staff} served table {n}'s whole order in {time} ({tier}).",
         "Paid": "Table {n} paid: {total}.",
         "PaidTip": "Table {n} paid: {total}, tip {tip}.",
         "ChangeShort": "{staff} gave table {n} too little change.",
@@ -317,6 +318,13 @@
         "MoveTo": "Move your token into a \"{zone}\" station.",
         "Here": "Station: {zones}",
         "Nowhere": "Your token isn't in any service station."
+      },
+      "Tier": {
+        "lightning": "Lightning",
+        "fast": "Fast",
+        "ok": "Fair",
+        "slow": "Slow",
+        "Hint": "The stopwatch starts at 0 when the order is placed and stops once everything is served. Lightning: big tip, Fast: good, Fair: small, Slow: none. The bar shows the time left before the next tier."
       }
     },
     "Zone": {

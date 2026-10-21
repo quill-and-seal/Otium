@@ -1,5 +1,14 @@
 # Journal des versions
 
+## 0.1.3
+
+Le chrono remplace la patience.
+
+- Chaque commande a un **chronomètre** qui part de 0 et s'arrête quand tout est servi ; les clients ne partent plus
+- Le pourboire dépend de la rapidité, en quatre paliers : **Éclair** (gros pourboire), **Rapide**, **Correct**, **Lent** (rien). Le temps visé de chaque commande suit la préparation de ses plats ; un client pressé vise plus court mais donne plus
+- Une jauge sous le chrono montre le temps restant avant le palier suivant, et le plateau propose d'abord les tables qui ont le plus attendu
+- Vue MJ : « Temps visé » remplace « Patience », temps moyen de service dans les statistiques et le bilan
+
 ## 0.1.2
 
 Les postes de service : la taverne se joue sur la scène.
