@@ -1,0 +1,12 @@
+{
+  "name": "otium",
+  "private": true,
+  "type": "module",
+  "description": "Outils de développement d'Otium (le module Foundry n'a besoin d'aucune dépendance).",
+  "scripts": {
+    "build:preview": "node tools/build-preview.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

@@ -2,8 +2,10 @@
  * Otium — le temps libre des personnages pour Foundry VTT v14 (dnd5e).
  * Point d'entrée : réglages, socket, contrôles de scène, hooks et API publique.
  *
- * v0.1 : la taverne en mode Clientèle. Les joueurs ouvrent la carte et commandent seuls ;
- * le paiement, le stock, les effets (au choix du MJ) et l'annonce dans le chat sont automatiques.
+ * Mode Clientèle : les joueurs ouvrent la carte et commandent seuls ; paiement, stock,
+ * effets (au choix du MJ) et annonce dans le chat sont automatiques.
+ * Mode Service : les joueurs tiennent la taverne (salle, tireuse, cuisine, caisse) ;
+ * le MJ pilote le service, et un joueur attablé passe commande aux serveurs.
  */
 
 import { MODULE_ID, SOCKET, SETTING_TAVERNS, FLAG_TAVERN, log } from "./constants.js";
@@ -12,6 +14,8 @@ import { TEMPLATES } from "./presets.js";
 import { placeOrder } from "./order.js";
 import { addAlcohol, sober, drunkLevel } from "./effects.js";
 import { MenuApp, refreshApps, openApps, openMenu, openSceneMenu, openTavernList } from "./apps.js";
+import { getService, getSummary, openService, sendOp, handleServiceSocket, requestSync, payTips } from "./service.js";
+import { ServiceClientApp, openServiceServer, openServiceGM, openServiceClient } from "./service-apps.js";
 
 /* -------------------------------------------- */
 /*  Initialisation                              */
@@ -44,7 +48,17 @@ Hooks.once("init", () => {
     openTaverns: () => openTavernList(),
     drunkLevel,
     addAlcohol,
-    sober
+    sober,
+    service: {
+      get: getService,
+      summary: getSummary,
+      open: openService,
+      send: sendOp,
+      payTips,
+      openServer: () => openServiceServer(),
+      openGM: () => openServiceGM(),
+      openClient: () => openServiceClient()
+    }
   };
 });
 
@@ -55,9 +69,12 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   game.socket.on(SOCKET, async (message) => {
+    if (await handleServiceSocket(message)) return;
     if (!game.users.activeGM?.isSelf) return;
     if (message?.action === "consume") await consumeStock(message.tavernId, message.lines);
   });
+  // Un joueur qui arrive en plein service récupère l'état chez le MJ
+  requestSync();
 });
 
 /* -------------------------------------------- */
@@ -82,7 +99,17 @@ Hooks.on("getSceneControlButtons", (controls) => {
     icon: "fa-solid fa-beer-mug-empty",
     button: true,
     order,
-    onChange: () => openSceneMenu()
+    // Pendant un service, la chope installe le joueur à une table : ce sont les serveurs qui préparent
+    onChange: () => (getService() ? openServiceClient() : openSceneMenu())
+  });
+
+  add({
+    name: "otium-service",
+    title: game.user.isGM ? "OTIUM.Controls.ServiceGM" : "OTIUM.Controls.Service",
+    icon: game.user.isGM ? "fa-solid fa-clipboard-list" : "fa-solid fa-bell-concierge",
+    button: true,
+    order: order + 1,
+    onChange: () => (game.user.isGM ? openServiceGM() : openServiceServer())
   });
 
   if (game.user.isGM) {
@@ -91,7 +118,7 @@ Hooks.on("getSceneControlButtons", (controls) => {
       title: "OTIUM.Controls.Taverns",
       icon: "fa-solid fa-store",
       button: true,
-      order: order + 1,
+      order: order + 2,
       onChange: () => openTavernList()
     });
   }
@@ -119,6 +146,7 @@ Hooks.on("canvasReady", () => refreshApps());
 Hooks.on("updateActor", (actor) => {
   for (const app of openApps) {
     if (app instanceof MenuApp && app.buyerId === actor.id) app.render();
+    if (app instanceof ServiceClientApp && app.actorId === actor.id) app.render();
   }
 });
 

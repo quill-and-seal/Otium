@@ -5,7 +5,7 @@
  * Les joueurs passent par le socket pour ce qu'ils n'ont pas le droit d'écrire (les stocks).
  */
 
-import { MODULE_ID, SETTING_TAVERNS, FLAG_TAVERN, CATEGORIES, RESTS } from "./constants.js";
+import { MODULE_ID, SETTING_TAVERNS, FLAG_TAVERN, CATEGORIES, RESTS, STATIONS, STATION_DEFAULTS } from "./constants.js";
 
 const { deepClone, randomID } = foundry.utils;
 
@@ -21,10 +21,13 @@ function int(value, min = 0, max = Infinity) {
 /** Article de la carte avec toutes ses valeurs par défaut. */
 export function newItem(data = {}) {
   const stock = data.stock;
+  const category = CATEGORIES.includes(data.category) ? data.category : "other";
+  const station = STATIONS.includes(data.station) ? data.station : STATION_DEFAULTS[category].station;
+  const prepTime = Number(data.prepTime);
   return {
     id: data.id || randomID(),
     name: String(data.name ?? ""),
-    category: CATEGORIES.includes(data.category) ? data.category : "other",
+    category,
     price: {
       value: Math.max(0, Number(data.price?.value) || 0),
       denom: ["pp", "gp", "ep", "sp", "cp"].includes(data.price?.denom) ? data.price.denom : "gp"
@@ -34,7 +37,10 @@ export function newItem(data = {}) {
     // Effets (appliqués seulement si le MJ les active sur la taverne)
     alcohol: int(data.alcohol, 0, 3),
     tempHp: int(data.tempHp, 0, 99),
-    rest: RESTS.includes(data.rest) ? data.rest : "none"
+    rest: RESTS.includes(data.rest) ? data.rest : "none",
+    // Mode Service : poste qui prépare l'article et temps de préparation (secondes)
+    station,
+    prepTime: Number.isFinite(prepTime) && prepTime > 0 ? Math.min(120, prepTime) : station === "stove" ? STATION_DEFAULTS.food.prepTime : STATION_DEFAULTS.other.prepTime
   };
 }
 

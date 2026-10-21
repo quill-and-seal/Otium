@@ -1,0 +1,245 @@
+<title>Banc d'essai Otium</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Signika:wght@400;600;700&family=Alegreya+SC:wght@700&family=JetBrains+Mono:wght@400;600&display=swap">
+<script>window.FontAwesomeConfig = { autoReplaceSvg: "nest", observeMutations: true };</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+<style>
+  /* Mise en page : établi à trois colonnes — poste de jeu (rôle, boutons, personnages) | fenêtres du module | chat.
+     Les fenêtres imitent celles de Foundry v14 ; le reste est l'atelier autour. */
+  :root {
+    --bg: #e6e8ec;
+    --panel: #f6f7f9;
+    --win: #fbfbfc;
+    --win-head: #262833;
+    --win-head-fg: #f1ece2;
+    --input: #ffffff;
+    --line: #cbd0d8;
+    --fg: #1c1f26;
+    --muted: #5c6370;
+    --ale: #b07a22;
+    --ale-soft: rgba(176, 122, 34, 0.14);
+    --danger: #b3261e;
+    --danger-soft: rgba(179, 38, 30, 0.12);
+    --font-display: "Alegreya SC", "Georgia", serif;
+    --font-body: "Signika", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111216; --panel: #181a20; --win: #1e2028; --win-head: #0c0d11; --win-head-fg: #efe6d4;
+      --input: #14151a; --line: #31343d; --fg: #e9e6df; --muted: #9b9fa9;
+      --ale: #e0a548; --ale-soft: rgba(224, 165, 72, 0.16); --danger: #f2766b; --danger-soft: rgba(242, 118, 107, 0.14);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111216; --panel: #181a20; --win: #1e2028; --win-head: #0c0d11; --win-head-fg: #efe6d4;
+    --input: #14151a; --line: #31343d; --fg: #e9e6df; --muted: #9b9fa9;
+    --ale: #e0a548; --ale-soft: rgba(224, 165, 72, 0.16); --danger: #f2766b; --danger-soft: rgba(242, 118, 107, 0.14);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .num, time { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--ale); outline-offset: 2px; }
+
+  /* ---- Barre du haut ---- */
+  .topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    padding-block: 12px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; margin-right: auto; }
+  .brand h1 { margin: 0; font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.02em; color: var(--ale); }
+  .brand span { color: var(--muted); font-size: 0.9rem; }
+  .seg-group { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg { border: 0; background: transparent; padding: 6px 12px; cursor: pointer; border-right: 1px solid var(--line); }
+  .seg:last-child { border-right: 0; }
+  .seg.on { background: var(--ale); color: #fff; }
+  .switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .switch.dim { opacity: 0.5; cursor: default; }
+  .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+
+  /* ---- Établi ---- */
+  .bench {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr) 320px;
+    gap: 16px;
+    align-items: start;
+    padding-block: 16px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .panel h2 { margin: 0; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+  .panel h2 button { text-transform: none; letter-spacing: 0; }
+
+  .tool {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 9px 10px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--win); cursor: pointer; text-align: left;
+  }
+  .tool:hover { border-color: var(--ale); background: var(--ale-soft); }
+  .tool i { width: 18px; color: var(--ale); }
+
+  .actor { border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: var(--win); }
+  .actor.foreign { opacity: 0.72; }
+  .actor header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .actor .pick { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .actor dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; }
+  .actor dt { color: var(--muted); }
+  .actor dd { margin: 0; font-family: var(--font-mono); font-size: 0.85rem; }
+  .actor .temp { color: var(--ale); }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip { font-size: 0.78rem; padding: 1px 8px; border-radius: 999px; background: var(--ale-soft); color: var(--fg); }
+  .chip.danger { background: var(--danger-soft); color: var(--danger); }
+  .actor-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+  .actor-actions button { flex: 1 1 auto; }
+
+  #windows { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  #windows-empty { text-align: center; color: var(--muted); padding: 40px 12px; border: 1px dashed var(--line); border-radius: 8px; width: 100%; }
+
+  #chat { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; max-height: 70vh; overflow-y: auto; }
+  .chat-message { background: var(--win); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+  .chat-message header { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+  .chat-message footer { font-size: 0.75rem; margin-top: 4px; }
+  .chat-message.socket { border-style: dashed; font-size: 0.85rem; }
+  .chat-message code { font-family: var(--font-mono); font-size: 0.8rem; }
+  .chat-message .message-content { overflow-wrap: anywhere; }
+
+  .notes { font-size: 0.85rem; color: var(--muted); margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+
+  /* ---- Faux Foundry : fenêtres ---- */
+  .application {
+    background: var(--win);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .application.bench-flash { animation: flash 0.6s ease-out; }
+  @keyframes flash { from { box-shadow: 0 0 0 3px var(--ale); } to { box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18); } }
+  @media (prefers-reduced-motion: reduce) { .application.bench-flash { animation: none; } }
+  .window-header { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--win-head); color: var(--win-head-fg); }
+  .window-title { margin: 0; font-size: 0.95rem; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .header-control { background: transparent; border: 0; color: inherit; cursor: pointer; padding: 2px 6px; }
+  .window-content { padding: 12px; overflow-x: auto; }
+
+  .application input[type="text"], .application input[type="number"], .application select, .application textarea {
+    background: var(--input); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; min-height: 28px; width: 100%; min-width: 0;
+  }
+  .application input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--ale); }
+  .application button, .actor button, .panel h2 button, .bench-dialog-buttons button {
+    background: var(--input); border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; min-height: 28px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .application button:hover:not(:disabled), .actor button:hover:not(:disabled) { border-color: var(--ale); }
+  .application button:disabled, .actor button:disabled { opacity: 0.45; cursor: default; }
+  .application button.icon { width: 28px; padding: 0; }
+  .application .form-group { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+  .application .form-group > label { flex: 2; }
+  .application .form-group .form-fields { flex: 3; display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .application .form-group > .hint { flex: 0 0 100%; }
+  .application .form-group.stacked { flex-direction: column; align-items: stretch; }
+  .application fieldset { border: 1px solid var(--line); border-radius: 6px; margin: 0; padding: 8px 10px; min-width: 0; overflow-x: auto; }
+  .application legend { padding: 0 4px; font-weight: 600; }
+  .application h3 { font-weight: 600; }
+
+  .bench-modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); display: grid; place-items: center; z-index: 50; padding: 16px; }
+  .bench-modal .dialog { width: min(380px, 100%); }
+  .bench-dialog-buttons { display: flex; gap: 8px; margin-top: 12px; }
+  .bench-dialog-buttons button { flex: 1; }
+
+  #toasts {
+    position: fixed; z-index: 60; display: flex; flex-direction: column; gap: 8px;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    right: max(16px, env(safe-area-inset-right, 0px));
+    width: min(380px, calc(100% - 32px));
+    pointer-events: none;
+  }
+  .toast { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 6px; background: var(--win-head); color: var(--win-head-fg); box-shadow: 0 4px 14px rgba(0,0,0,0.25); border-left: 4px solid var(--ale); }
+  .toast.warn { border-left-color: #d8a10f; }
+  .toast.error { border-left-color: #e5534b; }
+
+  @media (max-width: 1100px) {
+    .bench { grid-template-columns: 250px minmax(0, 1fr); }
+    .col.chat { grid-column: 1 / -1; }
+  }
+  @media (max-width: 720px) {
+    .bench { grid-template-columns: minmax(0, 1fr); }
+    #chat { max-height: none; }
+  }
+
+  /* ---- Styles du module (styles/otium.css) ---- */
+  /*__MODULE_CSS__*/
+</style>
+
+<div class="topbar">
+  <div class="brand"><h1>Otium</h1><span>banc d'essai · v0.1.1</span></div>
+  <div class="label">Joué par</div>
+  <div class="seg-group" id="roles" role="group" aria-label="Rôle"></div>
+  <label class="switch" id="gm-online-wrap"><input type="checkbox" id="gm-online" checked> MJ connecté</label>
+  <div class="seg-group" role="group" aria-label="Langue">
+    <button type="button" class="seg on" data-lang="fr">FR</button>
+    <button type="button" class="seg" data-lang="en">EN</button>
+  </div>
+</div>
+
+<main class="bench">
+  <div class="col">
+    <section class="panel">
+      <h2>Contrôles de scène · Jetons</h2>
+      <div id="controls" class="col"></div>
+    </section>
+    <section class="panel">
+      <h2>Personnages <button type="button" id="unpick">Désélectionner</button></h2>
+      <div id="actors" class="col"></div>
+    </section>
+    <section class="panel">
+      <h2>À tester</h2>
+      <ul class="notes">
+        <li>Commander jusqu'à vider un stock (cochon de lait, chambres).</li>
+        <li>Passer en joueur, décocher « MJ connecté », commander une chambre.</li>
+        <li>Enchaîner les eaux-de-vie jusqu'à Ivre, puis Repos long.</li>
+        <li>Côté MJ : créer une taverne, modifier la carte, l'ouvrir et la fermer.</li>
+        <li>Service : en MJ, outil « Service (MJ) », ouvrir puis lancer. En Alice, outil « Service », prendre son poste. En Bruno, la chope installe Lyra à une table.</li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="col">
+    <div id="windows"></div>
+    <p id="windows-empty">Aucune fenêtre ouverte. Utilisez les boutons des contrôles de scène.</p>
+  </div>
+
+  <div class="col chat">
+    <section class="panel">
+      <h2>Chat <button type="button" id="clear-chat">Vider</button></h2>
+      <ul id="chat"></ul>
+    </section>
+  </div>
+</main>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>/*__BUNDLE__*/</script>

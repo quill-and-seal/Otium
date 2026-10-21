@@ -13,6 +13,20 @@ export const FLAG_TAVERN = "tavern";
 /** Catégories d'un article de la carte, dans l'ordre d'affichage. */
 export const CATEGORIES = ["drink", "food", "room", "other"];
 
+/**
+ * Poste du mode Service qui prépare un article.
+ * tap : tireuse (mini-jeu), stove : cuisine (feux), board : planche et cave, none : pas servi en salle
+ */
+export const STATIONS = ["tap", "stove", "board", "none"];
+
+/** Poste et temps de préparation par défaut, selon la catégorie. */
+export const STATION_DEFAULTS = Object.freeze({
+  drink: { station: "tap", prepTime: 0 },
+  food: { station: "stove", prepTime: 8 },
+  other: { station: "board", prepTime: 3 },
+  room: { station: "none", prepTime: 0 }
+});
+
 /** Repos proposé par une chambre. */
 export const RESTS = ["none", "short", "long"];
 

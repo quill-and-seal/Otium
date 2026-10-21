@@ -19,13 +19,13 @@ export const TEMPLATES = {
       menu: [
         drink("Bière brune (chope)", 4, "cp", 1),
         drink("Cidre fermier (chope)", 3, "cp", 1),
-        drink("Vin de pays (pichet)", 2, "sp", 2),
+        drink("Vin de pays (pichet)", 2, "sp", 2, { station: "board", prepTime: 2.5 }),
         drink("Eau-de-vie de prune (petit verre)", 1, "sp", 3),
         drink("Lait chaud au miel", 2, "cp", 0),
-        food("Soupe et pain noir", 6, "cp", 0),
-        food("Pain, fromage et oignons", 1, "sp", 0),
-        food("Ragoût du jour", 3, "sp", 2),
-        food("Cochon de lait rôti (pour la table)", 2, "gp", 5, { stock: 1 }),
+        food("Soupe et pain noir", 6, "cp", 0, { prepTime: 7 }),
+        food("Pain, fromage et oignons", 1, "sp", 0, { station: "board", prepTime: 4 }),
+        food("Ragoût du jour", 3, "sp", 2, { prepTime: 12 }),
+        food("Cochon de lait rôti (pour la table)", 2, "gp", 5, { stock: 1, prepTime: 20 }),
         room("Paillasse dans le dortoir", 1, "sp", "long"),
         room("Chambre simple", 5, "sp", "long", { stock: 4 })
       ]
@@ -40,11 +40,11 @@ export const TEMPLATES = {
         drink("Bière des docks (chope)", 4, "cp", 1),
         drink("Grog chaud", 5, "cp", 2),
         drink("Rhum noir (verre)", 1, "sp", 3),
-        drink("Tord-boyaux du capitaine", 2, "sp", 3, { stock: 6 }),
+        drink("Tord-boyaux du capitaine", 2, "sp", 3, { stock: 6, station: "board", prepTime: 2 }),
         drink("Eau douce (gobelet)", 1, "cp", 0),
-        food("Galettes de mer et hareng", 5, "cp", 0),
+        food("Galettes de mer et hareng", 5, "cp", 0, { station: "board", prepTime: 3 }),
         food("Poisson grillé du jour", 3, "sp", 2),
-        food("Ragoût de crabe épicé", 5, "sp", 3, { stock: 8 }),
+        food("Ragoût de crabe épicé", 5, "sp", 3, { stock: 8, prepTime: 12 }),
         room("Hamac dans l'arrière-salle", 5, "cp", "long"),
         room("Chambre avec vue sur le port", 8, "sp", "long", { stock: 2 })
       ]
@@ -56,14 +56,14 @@ export const TEMPLATES = {
       keeper: "Dame Ilvara",
       description: "Un établissement raffiné : nappes blanches, musiciens discrets et une carte des vins qui coûte plus cher qu'une épée.",
       menu: [
-        drink("Vin elfique de la Lune d'Ambre (verre)", 10, "gp", 2, { stock: 3 }),
+        drink("Vin elfique de la Lune d'Ambre (verre)", 10, "gp", 2, { stock: 3, station: "board", prepTime: 3 }),
         drink("Hydromel nain vieilli", 5, "sp", 2),
-        drink("Vin blanc des coteaux (verre)", 2, "sp", 1),
+        drink("Vin blanc des coteaux (verre)", 2, "sp", 1, { station: "board", prepTime: 2 }),
         drink("Infusion de fleurs", 1, "sp", 0),
         food("Assiette de la maison", 8, "sp", 3),
         food("Faisan aux baies et pain blanc", 1, "gp", 4),
-        food("Banquet des seigneurs (pour la table)", 10, "gp", 8, { stock: 1 }),
-        food("Pâtisseries fines", 3, "sp", 1),
+        food("Banquet des seigneurs (pour la table)", 10, "gp", 8, { stock: 1, prepTime: 25 }),
+        food("Pâtisseries fines", 3, "sp", 1, { station: "board", prepTime: 3 }),
         room("Chambre confortable", 2, "gp", "long", { stock: 3 }),
         room("Suite avec bain chaud", 4, "gp", "long", { stock: 1 }),
         room("Salon privé (une heure)", 5, "sp", "short")

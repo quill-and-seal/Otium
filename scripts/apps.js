@@ -5,7 +5,7 @@
  * - TavernConfig : modifier une taverne et sa carte, côté MJ
  */
 
-import { MODULE_ID, FLAG_TAVERN, CATEGORIES, RESTS, DRUNK, t, esc } from "./constants.js";
+import { MODULE_ID, FLAG_TAVERN, CATEGORIES, RESTS, STATIONS, DRUNK, t, esc } from "./constants.js";
 import { getTaverns, getTavern, saveTavern, deleteTavern, sceneTavern, setSceneTavern, newItem } from "./store.js";
 import { TEMPLATES, TEMPLATE_IDS } from "./presets.js";
 import { DENOMS, priceToCp, walletToCp, formatCp, formatWallet, abbr } from "./currency.js";
@@ -29,7 +29,7 @@ export function refreshApps() {
 }
 
 /** Classe de base : rendu par chaîne HTML et suivi des fenêtres ouvertes. */
-class OtiumApp extends ApplicationV2 {
+export class OtiumApp extends ApplicationV2 {
   _html() {
     return "";
   }
@@ -239,7 +239,7 @@ export class MenuApp extends OtiumApp {
   }
 }
 
-const CATEGORY_ICONS = {
+export const CATEGORY_ICONS = {
   drink: "fa-solid fa-beer-mug-empty",
   food: "fa-solid fa-drumstick-bite",
   room: "fa-solid fa-bed",
@@ -390,7 +390,7 @@ export class TavernConfig extends OtiumApp {
     tag: "form",
     classes: ["otium", "otium-config"],
     window: { icon: "fa-solid fa-pen", resizable: true },
-    position: { width: 760, height: "auto" },
+    position: { width: 900, height: "auto" },
     form: { handler: TavernConfig.#onSubmit, submitOnChange: true, closeOnSubmit: false },
     actions: {
       addItem: TavernConfig.#onAddItem,
@@ -423,7 +423,7 @@ export class TavernConfig extends OtiumApp {
       .map((item, index) => {
         const p = `menu.${item.id}`;
         return `
-        <tr class="otium-row" data-item-id="${item.id}" data-category="${item.category}">
+        <tr class="otium-row" data-item-id="${item.id}" data-category="${item.category}" data-station="${item.station}">
           <td><input type="text" name="${p}.name" value="${esc(item.name)}" placeholder="${esc(t("Item.Unnamed"))}"></td>
           <td><select name="${p}.category" class="otium-category">${opts(CATEGORIES, item.category, (c) => t(`Category.${c}`))}</select></td>
           <td class="otium-price-cell">
@@ -436,6 +436,10 @@ export class TavernConfig extends OtiumApp {
             <input class="fx-food" type="number" name="${p}.tempHp" value="${item.tempHp}" min="0" max="99" step="1" data-tooltip="${esc(t("Effects.TempHpTip"))}">
             <select class="fx-room" name="${p}.rest">${opts(RESTS, item.rest, (r) => t(`Rest.${r}`))}</select>
             <span class="fx-other">—</span>
+          </td>
+          <td class="otium-service-cell">
+            <select class="otium-station" name="${p}.station" data-tooltip="${esc(t("Config.StationTip"))}">${opts(STATIONS, item.station, (v) => t(`StationName.${v}`))}</select>
+            <input class="otium-prep" type="number" name="${p}.prepTime" value="${item.prepTime}" min="0.5" max="120" step="0.5" data-tooltip="${esc(t("Config.PrepTip"))}">
           </td>
           <td class="otium-row-actions">
             <button type="button" class="icon" data-action="moveItem" data-dir="-1" ${index === 0 ? "disabled" : ""}><i class="fa-solid fa-arrow-up"></i></button>
@@ -469,9 +473,9 @@ export class TavernConfig extends OtiumApp {
         <table class="otium-menu-table ${tv.effects ? "" : "no-effects"}">
           <thead><tr>
             <th>${t("Config.ItemName")}</th><th>${t("Config.Category")}</th><th>${t("Config.Price")}</th>
-            <th>${t("Config.Stock")}</th><th class="otium-fx">${t("Config.Effect")}</th><th></th>
+            <th>${t("Config.Stock")}</th><th class="otium-fx">${t("Config.Effect")}</th><th>${t("Config.Service")}</th><th></th>
           </tr></thead>
-          <tbody>${rows || `<tr><td colspan="6" class="hint">${t("Menu.Empty")}</td></tr>`}</tbody>
+          <tbody>${rows || `<tr><td colspan="7" class="hint">${t("Menu.Empty")}</td></tr>`}</tbody>
         </table>
         <div class="otium-add">
           ${CATEGORIES.map(
@@ -487,6 +491,12 @@ export class TavernConfig extends OtiumApp {
     for (const select of this.element.querySelectorAll("select.otium-category")) {
       select.addEventListener("change", (event) => {
         event.target.closest(".otium-row").dataset.category = event.target.value;
+      });
+    }
+    // Le temps de préparation ne sert qu'en cuisine et sur la planche
+    for (const select of this.element.querySelectorAll("select.otium-station")) {
+      select.addEventListener("change", (event) => {
+        event.target.closest(".otium-row").dataset.station = event.target.value;
       });
     }
     // Activer ou non les effets grise la colonne
@@ -515,7 +525,9 @@ export class TavernConfig extends OtiumApp {
         stock: r.stock,
         alcohol: r.alcohol,
         tempHp: r.tempHp,
-        rest: r.rest
+        rest: r.rest,
+        station: r.station,
+        prepTime: r.prepTime
       });
     });
     // Pas de redessin de cette fenêtre : on garderait mal le focus en tabulant

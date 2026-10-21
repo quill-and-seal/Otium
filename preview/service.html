@@ -1,0 +1,1240 @@
+<title>Otium Service</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Signika:wght@400;600;700&family=Alegreya+SC:wght@700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Mise en page : une barre d'onglets (Serveur / MJ / Client), chaque vue est une fenêtre façon Foundry ;
+     « Côte à côte » place les trois vues en colonnes pour voir la synchronisation en direct. */
+  :root {
+    --bg: #e6e8ec;
+    --panel: #f6f7f9;
+    --win: #fbfbfc;
+    --win-head: #262833;
+    --win-head-fg: #f1ece2;
+    --input: #ffffff;
+    --line: #cbd0d8;
+    --fg: #1c1f26;
+    --muted: #5c6370;
+    --ale: #b07a22;
+    --ale-soft: rgba(176, 122, 34, 0.14);
+    --ok: #2f7d4f;
+    --ok-soft: rgba(47, 125, 79, 0.14);
+    --warn: #b7791f;
+    --danger: #b3261e;
+    --danger-soft: rgba(179, 38, 30, 0.12);
+    --stove: #a4512a;
+    --font-display: "Alegreya SC", "Georgia", serif;
+    --font-body: "Signika", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111216; --panel: #181a20; --win: #1e2028; --win-head: #0c0d11; --win-head-fg: #efe6d4;
+      --input: #14151a; --line: #31343d; --fg: #e9e6df; --muted: #9b9fa9;
+      --ale: #e0a548; --ale-soft: rgba(224, 165, 72, 0.16); --ok: #5cc28a; --ok-soft: rgba(92, 194, 138, 0.15);
+      --warn: #e6b450; --danger: #f2766b; --danger-soft: rgba(242, 118, 107, 0.14); --stove: #e08a5c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111216; --panel: #181a20; --win: #1e2028; --win-head: #0c0d11; --win-head-fg: #efe6d4;
+    --input: #14151a; --line: #31343d; --fg: #e9e6df; --muted: #9b9fa9;
+    --ale: #e0a548; --ale-soft: rgba(224, 165, 72, 0.16); --ok: #5cc28a; --ok-soft: rgba(92, 194, 138, 0.15);
+    --warn: #e6b450; --danger: #f2766b; --danger-soft: rgba(242, 118, 107, 0.14); --stove: #e08a5c;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; line-height: 1.4; }
+  button, input, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--ale); outline-offset: 2px; }
+  .num { font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-size: 0.85em; }
+  .muted { color: var(--muted); }
+  .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+
+  button {
+    background: var(--input); border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; min-height: 30px;
+    cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  button:hover:not(:disabled) { border-color: var(--ale); }
+  button:disabled { opacity: 0.45; cursor: default; }
+  button.primary { background: var(--ale); border-color: var(--ale); color: #fff; font-weight: 600; }
+  button.danger { color: var(--danger); }
+  select, input[type="range"] { accent-color: var(--ale); }
+  select { background: var(--input); border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; min-height: 30px; }
+
+  /* ---- Barre du haut ---- */
+  .topbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+    padding-block: 12px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    background: var(--panel); border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; margin-right: auto; }
+  .brand h1 { margin: 0; font-family: var(--font-display); font-size: 1.5rem; color: var(--ale); }
+  .seg-group { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg { border: 0; border-radius: 0; border-right: 1px solid var(--line); background: transparent; padding: 6px 12px; }
+  .seg:last-child { border-right: 0; }
+  .seg.on { background: var(--ale); color: #fff; }
+  .clock { font-family: var(--font-mono); font-size: 0.95rem; padding: 4px 10px; border-radius: 4px; background: var(--win); border: 1px solid var(--line); }
+  .clock.paused { color: var(--muted); }
+
+  /* ---- Vues ---- */
+  .views {
+    display: grid; gap: 16px; align-items: start;
+    padding-block: 16px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .views.side { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr); }
+  .view { min-width: 0; }
+  .views:not(.side) .view:not(.active) { display: none; }
+
+  .window { background: var(--win); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.14); }
+  .window > header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--win-head); color: var(--win-head-fg); }
+  .window > header h2 { margin: 0; font-size: 1rem; font-weight: 600; flex: 1; }
+  .window > header .tag { font-size: 0.75rem; opacity: 0.75; }
+  .window-content { padding: 12px; display: flex; flex-direction: column; gap: 14px; }
+
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .section-title { margin: 0; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .section-title::after { content: ""; flex: 1; border-bottom: 1px solid var(--line); }
+
+  .bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--ok); transition: width 0.1s linear; }
+  .bar.mid > i { background: var(--warn); }
+  .bar.low > i { background: var(--danger); }
+  .bar.neutral > i { background: var(--ale); }
+
+  .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; padding: 2px 8px; border-radius: 999px; background: var(--ale-soft); }
+  .chip.done { background: var(--ok-soft); color: var(--ok); text-decoration: line-through; }
+  .chip.perfect { box-shadow: inset 0 0 0 1px var(--ok); }
+  .chip.bad { background: var(--danger-soft); color: var(--danger); }
+  button.chip { min-height: 26px; border: 0; }
+
+  /* Serveur : statut */
+  .status { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; align-items: center; padding: 8px 10px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); }
+  .status .busy { color: var(--ale); font-weight: 600; }
+
+  /* Salle : tables */
+  .tables { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+  .table-card { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; background: var(--panel); min-width: 0; }
+  .table-card.empty { opacity: 0.55; border-style: dashed; }
+  .table-card.bill { border-color: var(--ale); }
+  .table-card.calling { animation: ring 0.8s ease-in-out infinite alternate; }
+  @keyframes ring { from { box-shadow: 0 0 0 0 var(--ale-soft); } to { box-shadow: 0 0 0 4px var(--ale); } }
+  .table-card header { display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
+  .table-card .who { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .table-card .actions { display: flex; gap: 6px; }
+  .table-card .actions button { flex: 1; }
+
+  /* Postes */
+  .stations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .views.side .stations { grid-template-columns: minmax(0, 1fr); }
+  .station { border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .station h3 { margin: 0; font-size: 0.95rem; }
+  .tap-zone { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 10px; align-items: stretch; }
+  .glass { position: relative; height: 120px; border: 2px solid var(--line); border-top: 0; border-radius: 0 0 8px 8px; overflow: hidden; background: var(--input); }
+  .glass .target { position: absolute; left: 0; right: 0; bottom: 75%; height: 15%; background: var(--ok-soft); border-top: 1px dashed var(--ok); border-bottom: 1px dashed var(--ok); }
+  .glass .beer { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: linear-gradient(to top, #c98a1a, #e9b44c); }
+  .glass .foam { position: absolute; left: 0; right: 0; height: 8px; background: #f6efe0; }
+  .tap-btn { min-height: 64px; font-weight: 600; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .tap-btn.holding { background: var(--ale); color: #fff; }
+  .slot { border: 1px dashed var(--line); border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; }
+  .slot.ready { border-style: solid; border-color: var(--ok); }
+  .slot.burnt { border-style: solid; border-color: var(--danger); }
+  .slot .row button { flex: 1 1 auto; }
+
+  /* Comptoir et plateau */
+  .counter { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; align-items: stretch; }
+  .views.side .counter { grid-template-columns: minmax(0, 1fr); }
+  .shelf { border: 1px solid var(--line); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 10px; background: var(--panel); min-width: 0; }
+  .shelf-head { display: flex; align-items: baseline; gap: 8px; }
+  .shelf-head .section-title { flex: 1; }
+  .tray-hint { margin: 0; font-size: 0.85rem; }
+  .dish-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+  .dish {
+    position: relative; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px;
+    min-height: 52px; padding: 6px 10px 6px 12px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--win); text-align: left; box-shadow: inset 4px 0 0 var(--st, var(--line));
+  }
+  .dish.st-tap { --st: var(--ale); }
+  .dish.st-stove { --st: var(--stove); }
+  .dish.st-board { --st: var(--ok); }
+  .dish-name { font-weight: 600; line-height: 1.2; padding-right: 24px; }
+  .dish-tag { font-size: 0.72rem; color: var(--ok); text-transform: uppercase; letter-spacing: 0.06em; }
+  .dish-count { position: absolute; top: 6px; right: 8px; padding: 0 6px; border-radius: 999px; background: var(--fg); color: var(--win); font-size: 0.75rem; }
+  .tray-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .tray-slot.empty { min-height: 52px; display: grid; place-items: center; border: 1px dashed var(--line); border-radius: 6px; color: var(--muted); font-size: 0.85rem; }
+  .dish-remove { position: absolute; top: 4px; right: 4px; width: 22px; min-height: 22px; padding: 0; border-radius: 50%; font-size: 0.9rem; line-height: 1; }
+  .serve-to { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+  /* MJ */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+  .stat { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; background: var(--panel); }
+  .stat b { display: block; font-family: var(--font-mono); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+  .gm-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .gm-table th { text-align: left; font-weight: 600; color: var(--muted); font-size: 0.78rem; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  .gm-table td { padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .gm-table td .bar { min-width: 60px; }
+  .scroll-x { overflow-x: auto; }
+  .log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow-y: auto; font-size: 0.88rem; }
+  .log li { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); gap: 8px; }
+  .log li.good span:last-child { color: var(--ok); }
+  .log li.bad span:last-child { color: var(--danger); }
+
+  /* Client */
+  .menu-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .menu-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 4px 6px; border-radius: 4px; }
+  .menu-list li.in { background: var(--ale-soft); }
+  .qty { display: flex; align-items: center; gap: 4px; }
+  .qty button { width: 28px; min-height: 28px; padding: 0; }
+  .qty span { min-width: 1.2rem; text-align: center; }
+  .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .steps li { display: flex; align-items: center; gap: 8px; }
+  .steps li .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); flex: 0 0 auto; }
+  .steps li.on .dot { background: var(--ale); }
+  .steps li.done .dot { background: var(--ok); }
+  .notice { margin: 0; padding: 8px 10px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); }
+
+  /* Modale de caisse */
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: grid; place-items: center; z-index: 50; padding: 16px; }
+  .modal .window { width: min(420px, 100%); }
+  .change-line { display: flex; justify-content: space-between; gap: 8px; }
+  .change-given { font-family: var(--font-mono); font-size: 1.4rem; text-align: center; padding: 8px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); }
+  .coins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+
+  /* Glisser-déposer */
+  [data-drag] { cursor: grab; touch-action: none; }
+  .dragging, .dragging * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+  .dragging [data-drop] { outline: 2px dashed var(--ale); outline-offset: 2px; }
+  .dragging [data-drop].drop-hover { outline-style: solid; background: var(--ale-soft); }
+  .drag-ghost { position: fixed; left: 0; top: 0; z-index: 70; pointer-events: none; box-shadow: 0 6px 18px rgba(0,0,0,0.3); background: var(--ale); color: #fff; }
+  .slot.ready[data-drag] { cursor: grab; }
+
+  #toasts {
+    position: fixed; z-index: 60; display: flex; flex-direction: column; gap: 8px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    right: max(16px, env(safe-area-inset-right, 0px));
+    width: min(360px, calc(100% - 32px)); pointer-events: none;
+  }
+  .toast { padding: 9px 12px; border-radius: 6px; background: var(--win-head); color: var(--win-head-fg); border-left: 4px solid var(--ale); box-shadow: 0 4px 14px rgba(0,0,0,0.25); }
+  .toast.good { border-left-color: #4caf7a; }
+  .toast.bad { border-left-color: #e5534b; }
+
+  @media (max-width: 1250px) { .views.side { grid-template-columns: minmax(0, 1fr); } .views.side .view { display: block; } }
+  @media (max-width: 820px) { .stations, .counter { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 420px) { .tray-slots { grid-template-columns: minmax(0, 1fr); } }
+  @media (prefers-reduced-motion: reduce) { .table-card.calling { animation: none; border-color: var(--ale); } .bar > i { transition: none; } }
+</style>
+
+<div class="topbar">
+  <div class="brand"><h1>Otium</h1><span class="muted">prototype du mode Service</span></div>
+  <div class="seg-group" role="tablist" aria-label="Vue">
+    <button type="button" class="seg on" data-tab="server" role="tab">Serveur</button>
+    <button type="button" class="seg" data-tab="gm" role="tab">MJ</button>
+    <button type="button" class="seg" data-tab="client" role="tab">Client</button>
+  </div>
+  <label class="row"><input type="checkbox" id="side"> Côte à côte</label>
+  <span class="clock paused num" id="clock">00:00 · en pause</span>
+</div>
+
+<main class="views" id="views">
+  <section class="view active" data-view="server">
+    <div class="window">
+      <header><h2>Service — vue Serveur</h2><span class="tag">ce que voit un joueur employé</span></header>
+      <div class="window-content" id="server"></div>
+    </div>
+  </section>
+  <section class="view" data-view="gm">
+    <div class="window">
+      <header><h2>Service — vue MJ</h2><span class="tag">pilotage du service</span></header>
+      <div class="window-content" id="gm"></div>
+    </div>
+  </section>
+  <section class="view" data-view="client">
+    <div class="window">
+      <header><h2>Service — vue Client</h2><span class="tag">un joueur attablé</span></header>
+      <div class="window-content" id="client"></div>
+    </div>
+  </section>
+</main>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   Données
+   ============================================================ */
+
+// Prix en pièces de cuivre. station : tap = tireuse, stove = cuisine, board = planche et cave
+const MENU = {
+  biere:  { name: "Bière brune",              price: 4,  station: "tap" },
+  cidre:  { name: "Cidre fermier",            price: 3,  station: "tap" },
+  vin:    { name: "Vin de pays (pichet)",     price: 20, station: "board", time: 2.5 },
+  pain:   { name: "Pain, fromage et oignons", price: 10, station: "board", time: 4 },
+  soupe:  { name: "Soupe et pain noir",       price: 6,  station: "stove", time: 7 },
+  ragout: { name: "Ragoût du jour",           price: 30, station: "stove", time: 12 }
+};
+const ORDERABLE = Object.keys(MENU);
+const NAMES = ["Gaspard le meunier", "Mère Agathe", "Deux gardes", "Un barde fauché", "Tilda la forgeronne", "Un marchand nain",
+  "Trois fermiers", "Une elfe voyageuse", "Le fils du bourgmestre", "Un ménestrel", "Une patrouille", "Old Bram", "Une prêtresse", "Des colporteurs"];
+const RUSH = { calm: 38, normal: 22, rush: 11 };
+const BURN = 9;           // secondes pour sortir un plat prêt avant qu'il brûle
+const TRAY = 3;           // places sur un plateau
+const WALK = 1.6;         // aller servir une table
+const BILL_PATIENCE = 35; // attente pour payer
+
+const fmt = (cp) => {
+  if (cp <= 0) return "0 pc";
+  const po = Math.floor(cp / 100), pa = Math.floor((cp % 100) / 10), pc = cp % 10;
+  return [po && `${po} po`, pa && `${pa} pa`, pc && `${pc} pc`].filter(Boolean).join(" ");
+};
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = (list) => list[Math.floor(Math.random() * list.length)];
+const clock = (t) => `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+
+/* ============================================================
+   État partagé (ce que le module synchroniserait entre MJ et joueurs)
+   ============================================================ */
+
+const S = {
+  running: false, t: 0, speed: 1, rush: "normal", patienceMul: 1, nextArrival: 2, seq: 1,
+  hurryNext: false,
+  tables: [1, 2, 3, 4, 5, 6].map((n) => ({ n, ticket: null })),
+  tickets: {},
+  stove: [null, null, null],
+  board: [null, null],
+  pass: [],
+  staff: {
+    thorin: { id: "thorin", name: "Thorin", tray: [], busy: null },
+    lyra:   { id: "lyra",   name: "Lyra",   tray: [], busy: null }
+  },
+  actors: { lyra: { name: "Lyra", purse: 324 }, thorin: { name: "Thorin", purse: 1293 }, bruno: { name: "Pip (Bruno)", purse: 150 } },
+  clientCart: {},
+  stats: { served: 0, failed: 0, unpaid: 0, revenue: 0, tips: 0, happy: 0, finished: 0, perfect: 0, burnt: 0, spilled: 0 },
+  log: [],
+  ui: { tab: "server", side: false, me: "thorin", client: "bruno", drink: "biere" },
+  tap: null,
+  lastTap: null
+};
+
+function log(text, kind = "") {
+  S.log.unshift({ t: S.t, text, kind });
+  S.log.length = Math.min(S.log.length, 80);
+}
+
+function toast(text, kind = "") {
+  const el = document.createElement("div");
+  el.className = `toast ${kind}`;
+  el.textContent = text;
+  document.getElementById("toasts").prepend(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+/* ============================================================
+   Clients
+   ============================================================ */
+
+function freeTable() {
+  const free = S.tables.filter((tb) => !tb.ticket);
+  return free.length ? pick(free) : null;
+}
+
+function newTicket(table, { name, kind = "pnj", actorId = null, items, hurry = false }) {
+  const id = `T${S.seq++}`;
+  const patienceMax = kind === "player" ? Infinity : (55 + 14 * items.length) * S.patienceMul * (hurry ? 0.5 : 1);
+  S.tickets[id] = {
+    id, table: table.n, name, kind, actorId, hurry,
+    items: items.map((m) => ({ m, served: false, perfect: false })),
+    phase: "order", patience: patienceMax, patienceMax, created: S.t, serveFrac: 1, calling: false
+  };
+  table.ticket = id;
+  log(`Table ${table.n} : ${name} commande ${items.map((m) => MENU[m].name).join(", ")}.`);
+  return S.tickets[id];
+}
+
+function spawn(opts = {}) {
+  const table = freeTable();
+  if (!table) {
+    if (opts.manual) toast("La salle est pleine.", "bad");
+    return null;
+  }
+  const n = opts.big ? 5 : Math.random() < 0.45 ? 1 : Math.random() < 0.7 ? 2 : 3;
+  const items = Array.from({ length: n }, () => pick(ORDERABLE));
+  const hurry = opts.hurry || S.hurryNext;
+  S.hurryNext = false;
+  const name = opts.big ? "Une grande tablée" : pick(NAMES);
+  return newTicket(table, { name: hurry ? `${name} (pressé)` : name, items, hurry });
+}
+
+function total(ticket) {
+  return ticket.items.reduce((s, it) => s + MENU[it.m].price, 0);
+}
+
+function closeTicket(ticket) {
+  const table = S.tables.find((tb) => tb.n === ticket.table);
+  if (table) table.ticket = null;
+  delete S.tickets[ticket.id];
+}
+
+function leave(ticket, unpaid) {
+  S.stats.finished++;
+  if (unpaid) {
+    S.stats.unpaid++;
+    log(`Table ${ticket.table} : ${ticket.name} part sans payer (${fmt(total(ticket))} perdus).`, "bad");
+    toast(`Table ${ticket.table} est partie sans payer !`, "bad");
+  } else {
+    S.stats.failed++;
+    log(`Table ${ticket.table} : ${ticket.name} en a assez d'attendre et s'en va.`, "bad");
+    toast(`Table ${ticket.table} est partie furieuse.`, "bad");
+  }
+  closeTicket(ticket);
+}
+
+/* ============================================================
+   Actions des serveurs
+   ============================================================ */
+
+const me = () => S.staff[S.ui.me];
+const isBusy = (st) => !!st.busy || (S.tap && S.tap.staff === st.id);
+
+function setBusy(st, label, duration, then) {
+  st.busy = { label, start: S.t, end: S.t + duration, then };
+}
+
+function resolveBusy(st, then) {
+  if (!then) return;
+  if (then.type === "board") {
+    const slot = S.board[then.slot];
+    if (slot) {
+      S.pass.push({ uid: S.seq++, m: slot.m, perfect: false });
+      S.board[then.slot] = null;
+    }
+  }
+  if (then.type === "serve") serveTable(st, then.table);
+}
+
+function serveTable(st, n) {
+  const table = S.tables.find((tb) => tb.n === n);
+  const ticket = table && S.tickets[table.ticket];
+  if (!ticket || ticket.phase !== "order") return;
+  let count = 0;
+  st.tray = st.tray.filter((dish) => {
+    const need = ticket.items.find((it) => !it.served && it.m === dish.m);
+    if (!need) return true;
+    need.served = true;
+    need.perfect = dish.perfect;
+    count++;
+    return false;
+  });
+  if (!count) return toast(`Rien sur le plateau pour la table ${n}.`, "bad");
+  ticket.calling = false;
+  if (ticket.items.every((it) => it.served)) {
+    ticket.serveFrac = ticket.kind === "player" ? 1 : Math.max(0, ticket.patience / ticket.patienceMax);
+    ticket.phase = "bill";
+    ticket.patience = ticket.patienceMax = ticket.kind === "player" ? Infinity : BILL_PATIENCE * S.patienceMul;
+    S.stats.served++;
+    log(`${st.name} a servi toute la commande de la table ${n}.`, "good");
+  } else {
+    log(`${st.name} sert ${count} article(s) à la table ${n}.`);
+  }
+}
+
+const ACTIONS = {
+  pickMe: (el) => { S.ui.me = el.value; },
+  drink: (el) => { S.ui.drink = el.value; },
+  launch(el) {
+    const st = me();
+    const i = Number(el.dataset.slot);
+    if (isBusy(st) || S.stove[i]) return;
+    const m = el.dataset.m;
+    S.stove[i] = { m, readyAt: S.t + MENU[m].time, state: "cooking", start: S.t };
+    setBusy(st, `met ${MENU[m].name.toLowerCase()} sur le feu`, 0.8);
+  },
+  takeOut(el) {
+    const st = me();
+    const i = Number(el.dataset.slot);
+    const slot = S.stove[i];
+    if (isBusy(st) || !slot || slot.state !== "ready") return;
+    S.pass.push({ uid: S.seq++, m: slot.m, perfect: S.t - slot.readyAt < 2 });
+    S.stove[i] = null;
+    setBusy(st, "sort un plat du feu", 0.5);
+  },
+  trash(el) {
+    S.stove[Number(el.dataset.slot)] = null;
+  },
+  prep(el) {
+    const st = me();
+    const i = S.board.findIndex((s) => !s);
+    if (isBusy(st) || i < 0) return;
+    const m = el.dataset.m;
+    S.board[i] = { m, staff: st.id, start: S.t, end: S.t + MENU[m].time };
+    setBusy(st, `prépare ${MENU[m].name.toLowerCase()}`, MENU[m].time, { type: "board", slot: i });
+  },
+  take(el) {
+    const st = me();
+    if (st.tray.length >= TRAY) return toast("Le plateau est plein.", "bad");
+    const i = S.pass.findIndex((d) => d.uid === Number(el.dataset.uid));
+    if (i < 0) return;
+    st.tray.push(S.pass.splice(i, 1)[0]);
+  },
+  drop(el) {
+    const st = me();
+    const i = st.tray.findIndex((d) => d.uid === Number(el.dataset.uid));
+    if (i >= 0) S.pass.push(st.tray.splice(i, 1)[0]);
+  },
+  serve(el) {
+    const st = me();
+    if (isBusy(st)) return;
+    const n = Number(el.dataset.table);
+    setBusy(st, `porte le plateau à la table ${n}`, WALK, { type: "serve", table: n });
+  },
+  cash(el) {
+    const st = me();
+    const table = S.tables.find((tb) => tb.n === Number(el.dataset.table));
+    const ticket = table && S.tickets[table.ticket];
+    if (!ticket || ticket.phase !== "bill" || isBusy(st)) return;
+    openCashier(st, ticket);
+  },
+
+  // MJ
+  toggleRun() {
+    S.running = !S.running;
+    log(S.running ? "Le service commence." : "Service en pause.");
+  },
+  speed: (el) => { S.speed = Number(el.dataset.v); },
+  rush: (el) => { S.rush = el.value; S.nextArrival = Math.min(S.nextArrival, S.t + RUSH[S.rush]); },
+  patience: (el) => { S.patienceMul = Number(el.value); },
+  addClient: () => spawn({ manual: true }),
+  addHurry: () => spawn({ manual: true, hurry: true }),
+  addBig: () => spawn({ manual: true, big: true }),
+  endService() {
+    S.running = false;
+    openSummary();
+  },
+
+  // Client (joueur attablé)
+  pickClient: (el) => { S.ui.client = el.value; S.clientCart = {}; },
+  sit(el) {
+    const table = S.tables.find((tb) => tb.n === Number(el.dataset.table));
+    if (!table || table.ticket) return;
+    table.reserved = S.ui.client;
+  },
+  inc: (el) => { S.clientCart[el.dataset.m] = (S.clientCart[el.dataset.m] ?? 0) + 1; },
+  dec: (el) => {
+    const q = (S.clientCart[el.dataset.m] ?? 0) - 1;
+    if (q > 0) S.clientCart[el.dataset.m] = q; else delete S.clientCart[el.dataset.m];
+  },
+  order() {
+    const table = clientTable();
+    if (!table) return;
+    const items = Object.entries(S.clientCart).flatMap(([m, q]) => Array(q).fill(m));
+    if (!items.length) return;
+    const actor = S.actors[S.ui.client];
+    if (actor.purse < items.reduce((s, m) => s + MENU[m].price, 0)) return toast(`${actor.name} n'a pas assez d'argent.`, "bad");
+    delete table.reserved;
+    delete table.paidNote;
+    newTicket(table, { name: actor.name, kind: "player", actorId: S.ui.client, items });
+    S.clientCart = {};
+    toast(`${actor.name} passe commande à la table ${table.n}.`);
+  },
+  call() {
+    const ticket = clientTicket();
+    if (!ticket) return;
+    ticket.calling = true;
+    log(`Table ${ticket.table} : ${ticket.name} appelle un serveur.`);
+  },
+  standUp() {
+    const table = clientTable();
+    if (!table) return;
+    if (table.ticket) return;
+    delete table.reserved;
+    delete table.paidNote;
+  }
+};
+
+function clientTable() {
+  return S.tables.find((tb) => tb.reserved === S.ui.client || (tb.ticket && S.tickets[tb.ticket]?.actorId === S.ui.client)) ?? null;
+}
+function clientTicket() {
+  const table = clientTable();
+  return table?.ticket ? S.tickets[table.ticket] : null;
+}
+
+/* ---- Tireuse : maintenir, relâcher dans la zone verte ---- */
+
+function tapStart() {
+  const st = me();
+  if (!S.running || isBusy(st) || S.tap) return;
+  S.tap = { staff: st.id, m: S.ui.drink, level: 0 };
+  render();
+}
+
+function tapEnd() {
+  if (!S.tap) return;
+  const { staff, m, level } = S.tap;
+  S.tap = null;
+  const st = S.staff[staff];
+  let result;
+  if (level >= 100) {
+    result = { text: "Ça déborde ! Chope perdue.", kind: "bad" };
+    S.stats.spilled++;
+  } else if (level < 55) {
+    result = { text: "Trop peu, on recommence.", kind: "bad" };
+  } else {
+    const perfect = level >= 75 && level <= 90;
+    S.pass.push({ uid: S.seq++, m, perfect });
+    if (perfect) S.stats.perfect++;
+    result = { text: perfect ? "Chope parfaite !" : "Ça ira.", kind: perfect ? "good" : "" };
+  }
+  S.lastTap = { ...result, who: st.name, at: S.t };
+  render();
+}
+
+/* ============================================================
+   Caisse : rendre la monnaie
+   ============================================================ */
+
+function openCashier(st, ticket) {
+  const due = total(ticket);
+  const given = due < 100 ? 100 : Math.ceil((due + 1) / 100) * 100;
+  const state = { change: 0 };
+  setBusy(st, `encaisse la table ${ticket.table}`, 9999);
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.innerHTML = `
+    <div class="window" role="dialog" aria-modal="true" aria-label="Caisse">
+      <header><h2>Caisse — table ${ticket.table}</h2><span class="tag">${esc(st.name)}</span></header>
+      <div class="window-content">
+        <div class="change-line"><span>Note</span><strong class="num">${fmt(due)}</strong></div>
+        <div class="change-line"><span>${esc(ticket.name)} donne</span><strong class="num">${fmt(given)}</strong></div>
+        <p class="label">Monnaie à rendre</p>
+        <div class="change-given" id="change-given">0 pc</div>
+        <div class="coins">
+          <button type="button" data-coin="10">+1 pa</button>
+          <button type="button" data-coin="1">+1 pc</button>
+          <button type="button" data-coin="0">Recompter</button>
+        </div>
+        <div class="row"><button type="button" class="primary" data-confirm style="flex:1">Rendre la monnaie</button></div>
+      </div>
+    </div>`;
+  const shown = modal.querySelector("#change-given");
+  modal.addEventListener("click", (event) => {
+    const coin = event.target.closest("[data-coin]");
+    if (coin) {
+      state.change = coin.dataset.coin === "0" ? 0 : state.change + Number(coin.dataset.coin);
+      shown.textContent = fmt(state.change);
+      return;
+    }
+    if (!event.target.closest("[data-confirm]")) return;
+    modal.remove();
+    st.busy = null;
+    settle(st, ticket, due, given - due, state.change);
+    render();
+  });
+  document.body.append(modal);
+  modal.querySelector("[data-coin]").focus();
+}
+
+function settle(st, ticket, due, expected, change) {
+  if (!S.tickets[ticket.id]) return toast("Le client est parti avant que vous ayez fini.", "bad");
+  let tip = Math.round(due * (0.1 + 0.3 * ticket.serveFrac)) + ticket.items.filter((it) => it.perfect).length;
+  let happy = ticket.serveFrac >= 0.4;
+  let revenue = due;
+  if (change < expected) {
+    tip = 0;
+    happy = false;
+    log(`${st.name} a mal rendu la monnaie à la table ${ticket.table} : le client râle.`, "bad");
+    toast(`Il manque ${fmt(expected - change)} : pas de pourboire.`, "bad");
+  } else if (change > expected) {
+    revenue -= change - expected;
+    log(`${st.name} a rendu ${fmt(change - expected)} de trop à la table ${ticket.table}.`, "bad");
+    toast(`${fmt(change - expected)} rendus en trop.`, "bad");
+  } else {
+    toast(`Compte juste ! Pourboire : ${fmt(tip)}.`, "good");
+  }
+  if (ticket.kind === "player") {
+    tip = 0;
+    S.actors[ticket.actorId].purse -= due;
+  }
+  S.stats.revenue += revenue;
+  S.stats.tips += tip;
+  S.stats.finished++;
+  if (happy) S.stats.happy++;
+  log(`Table ${ticket.table} payée : ${fmt(due)}${tip ? `, pourboire ${fmt(tip)}` : ""}.`, "good");
+  ticket.phase = "paid";
+  if (ticket.kind === "player") {
+    const table = S.tables.find((tb) => tb.n === ticket.table);
+    table.reserved = ticket.actorId;
+    table.paidNote = `Vous avez payé ${fmt(due)}.`;
+  }
+  closeTicket(ticket);
+}
+
+function openSummary() {
+  const s = S.stats;
+  const staff = Object.values(S.staff);
+  const share = Math.floor(s.tips / staff.length);
+  const sat = s.finished ? Math.round((100 * s.happy) / s.finished) : 100;
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.innerHTML = `
+    <div class="window" role="dialog" aria-modal="true" aria-label="Fin du service">
+      <header><h2>Fin du service</h2><span class="tag num">${clock(S.t)}</span></header>
+      <div class="window-content">
+        <div class="stats">
+          <div class="stat"><span class="label">Recette</span><b>${fmt(s.revenue)}</b></div>
+          <div class="stat"><span class="label">Pourboires</span><b>${fmt(s.tips)}</b></div>
+          <div class="stat"><span class="label">Satisfaction</span><b>${sat} %</b></div>
+        </div>
+        <p class="notice">${s.served} commandes servies, ${s.failed} clients partis furieux, ${s.unpaid} partis sans payer. ${s.perfect} chopes parfaites, ${s.burnt} plats brûlés.</p>
+        <p class="notice">Pourboires partagés : ${staff.map((st) => `${esc(st.name)} reçoit ${fmt(share)}`).join(", ")}. Dans le module, c'est ici que le MJ verse la paie et les pourboires sur les fiches.</p>
+        <div class="row"><button type="button" class="primary" data-close style="flex:1">Fermer</button></div>
+      </div>
+    </div>`;
+  modal.addEventListener("click", (e) => { if (e.target.closest("[data-close]")) modal.remove(); });
+  document.body.append(modal);
+}
+
+/* ============================================================
+   Boucle de jeu
+   ============================================================ */
+
+function step(dt) {
+  let dirty = false;
+  if (S.tap) {
+    S.tap.level += 55 * dt;
+    if (S.tap.level >= 100) { tapEnd(); dirty = true; }
+  }
+  for (const st of Object.values(S.staff)) {
+    if (st.busy && S.t >= st.busy.end) {
+      const then = st.busy.then;
+      st.busy = null;
+      resolveBusy(st, then);
+      dirty = true;
+    }
+  }
+  S.stove.forEach((slot, i) => {
+    if (!slot) return;
+    if (slot.state === "cooking" && S.t >= slot.readyAt) { slot.state = "ready"; dirty = true; }
+    else if (slot.state === "ready" && S.t >= slot.readyAt + BURN) {
+      slot.state = "burnt"; S.stats.burnt++; dirty = true;
+      log(`${MENU[slot.m].name} a brûlé sur le feu ${i + 1}.`, "bad");
+    }
+  });
+  for (const ticket of Object.values(S.tickets)) {
+    if (ticket.kind === "player") continue;
+    ticket.patience -= dt;
+    if (ticket.patience <= 0) { leave(ticket, ticket.phase === "bill"); dirty = true; }
+  }
+  if (S.t >= S.nextArrival) {
+    if (spawn()) dirty = true;
+    S.nextArrival = S.t + rand(0.6, 1.4) * RUSH[S.rush];
+  }
+  return dirty;
+}
+
+setInterval(() => {
+  if (!S.running) return;
+  const dt = 0.1 * S.speed;
+  S.t += dt;
+  if (step(dt)) render();
+  updateLive();
+}, 100);
+
+/* ============================================================
+   Rendu
+   ============================================================ */
+
+function barClass(frac) {
+  return frac > 0.5 ? "" : frac > 0.25 ? "mid" : "low";
+}
+function bar(kind, id, cls = "") {
+  return `<div class="bar ${cls}" data-bar="${kind}" data-id="${id}"><i></i></div>`;
+}
+
+function ticketNeeds(ticket) {
+  return ticket.items.map((it) => `<span class="chip ${it.served ? "done" : ""} ${it.perfect ? "perfect" : ""}">${esc(MENU[it.m].name)}</span>`).join("");
+}
+
+function renderServer() {
+  const st = me();
+  const busy = isBusy(st);
+  const trayHas = (ticket) => ticket.items.some((it) => !it.served && st.tray.some((d) => d.m === it.m));
+
+  const tables = S.tables.map((tb) => {
+    const ticket = tb.ticket && S.tickets[tb.ticket];
+    if (!ticket) {
+      const res = tb.reserved ? ` · ${esc(S.actors[tb.reserved]?.name)} s'installe` : "";
+      return `<article class="table-card empty"><header><strong>Table ${tb.n}</strong><span class="muted">libre${res}</span></header></article>`;
+    }
+    const player = ticket.kind === "player";
+    return `
+      <article class="table-card ${ticket.phase === "bill" ? "bill" : ""} ${ticket.calling ? "calling" : ""}" ${ticket.phase === "order" ? `data-drop="table:${tb.n}"` : ""}>
+        <header><strong>Table ${tb.n}</strong><span class="muted">${ticket.phase === "bill" ? "addition" : player ? "joueur" : ""}</span></header>
+        <span class="who" title="${esc(ticket.name)}">${esc(ticket.name)}${ticket.calling ? " 🔔" : ""}</span>
+        <div class="row">${ticketNeeds(ticket)}</div>
+        ${player ? `<span class="label">Attente illimitée (joueur)</span>` : bar("ticket", ticket.id)}
+        <div class="actions">
+          ${ticket.phase === "order"
+            ? `<button type="button" data-act="serve" data-table="${tb.n}" ${busy || !trayHas(ticket) ? "disabled" : ""}>Servir</button>`
+            : `<button type="button" class="primary" data-act="cash" data-table="${tb.n}" ${busy ? "disabled" : ""}>Encaisser ${fmt(total(ticket))}</button>`}
+        </div>
+      </article>`;
+  }).join("");
+
+  const tapping = S.tap && S.tap.staff === st.id;
+  const tapOther = S.tap && S.tap.staff !== st.id ? S.staff[S.tap.staff].name : null;
+  const last = S.lastTap && S.t - S.lastTap.at < 6 ? `<span class="chip ${S.lastTap.kind === "bad" ? "bad" : S.lastTap.kind === "good" ? "done" : ""}" style="text-decoration:none">${esc(S.lastTap.who)} : ${esc(S.lastTap.text)}</span>` : "";
+
+  const stove = S.stove.map((slot, i) => {
+    if (!slot) {
+      const opts = ORDERABLE.filter((m) => MENU[m].station === "stove")
+        .map((m) => `<button type="button" data-act="launch" data-slot="${i}" data-m="${m}" ${busy || !S.running ? "disabled" : ""}>${esc(MENU[m].name.split(" ")[0])}</button>`).join("");
+      return `<div class="slot"><span class="label">Feu ${i + 1} · libre</span><div class="row">${opts}</div></div>`;
+    }
+    if (slot.state === "cooking") return `<div class="slot"><span class="label">Feu ${i + 1} · ${esc(MENU[slot.m].name)}</span>${bar("cook", i, "neutral")}</div>`;
+    if (slot.state === "ready") return `<div class="slot ready" data-drag="stove:${i}" data-label="${esc(MENU[slot.m].name)}"><span class="label">Feu ${i + 1} · prêt, à sortir vite</span>${bar("burn", i)}<button type="button" class="primary" data-act="takeOut" data-slot="${i}" ${busy ? "disabled" : ""}>Sortir ${esc(MENU[slot.m].name)}</button></div>`;
+    return `<div class="slot burnt"><span class="label">Feu ${i + 1} · brûlé</span><button type="button" class="danger" data-act="trash" data-slot="${i}">Jeter</button></div>`;
+  }).join("");
+
+  const board = S.board.map((slot, i) =>
+    slot
+      ? `<div class="slot"><span class="label">${esc(S.staff[slot.staff].name)} · ${esc(MENU[slot.m].name)}</span>${bar("board", i, "neutral")}</div>`
+      : `<div class="slot"><span class="label">Plan ${i + 1} · libre</span></div>`
+  ).join("");
+  const boardBtns = ORDERABLE.filter((m) => MENU[m].station === "board")
+    .map((m) => `<button type="button" data-act="prep" data-m="${m}" ${busy || !S.running || S.board.every(Boolean) ? "disabled" : ""}>${esc(MENU[m].name)}</button>`).join("");
+
+  // Comptoir : les plats identiques sont regroupés en une tuile avec un compteur
+  const STATION_ORDER = { tap: 0, board: 1, stove: 2 };
+  const groups = [];
+  for (const d of S.pass) {
+    const g = groups.find((x) => x.m === d.m && x.perfect === d.perfect);
+    if (g) g.uids.push(d.uid);
+    else groups.push({ m: d.m, perfect: d.perfect, uids: [d.uid] });
+  }
+  groups.sort((a, b) => STATION_ORDER[MENU[a.m].station] - STATION_ORDER[MENU[b.m].station] || MENU[a.m].name.localeCompare(MENU[b.m].name));
+  const trayFull = st.tray.length >= TRAY;
+  const pass = groups.map((g) => `
+    <button type="button" class="dish st-${MENU[g.m].station}" data-act="take" data-uid="${g.uids[0]}" data-drag="pass:${g.uids[0]}" data-label="${esc(MENU[g.m].name)}"
+      ${trayFull ? "disabled" : ""} title="${trayFull ? "Plateau plein" : "Cliquer pour mettre sur le plateau, ou glisser vers une table"}">
+      <span class="dish-name">${esc(MENU[g.m].name)}</span>
+      ${g.perfect ? `<span class="dish-tag">parfait</span>` : ""}
+      ${g.uids.length > 1 ? `<span class="dish-count num">×${g.uids.length}</span>` : ""}
+    </button>`).join("");
+
+  // Plateau : des emplacements fixes, et les tables qu'on peut servir avec
+  const traySlots = Array.from({ length: TRAY }, (_, i) => {
+    const d = st.tray[i];
+    if (!d) return `<div class="tray-slot empty">Libre</div>`;
+    return `<div class="tray-slot dish st-${MENU[d.m].station}" data-drag="tray:${d.uid}" data-label="${esc(MENU[d.m].name)}" title="Glisser vers une table">
+      <span class="dish-name">${esc(MENU[d.m].name)}</span>
+      ${d.perfect ? `<span class="dish-tag">parfait</span>` : ""}
+      <button type="button" class="dish-remove" data-act="drop" data-uid="${d.uid}" aria-label="Reposer ${esc(MENU[d.m].name)} sur le comptoir" title="Reposer sur le comptoir">×</button>
+    </div>`;
+  }).join("");
+  const targets = S.tables
+    .map((tb) => ({ tb, ticket: tb.ticket && S.tickets[tb.ticket] }))
+    .filter(({ ticket }) => ticket && ticket.phase === "order")
+    .map(({ tb, ticket }) => {
+      const pool = st.tray.map((d) => d.m);
+      let n = 0;
+      for (const it of ticket.items) {
+        if (it.served) continue;
+        const k = pool.indexOf(it.m);
+        if (k >= 0) { pool.splice(k, 1); n++; }
+      }
+      return { n: tb.n, count: n, urgent: ticket.kind !== "player" && ticket.patience / ticket.patienceMax < 0.35 };
+    })
+    .filter((x) => x.count > 0)
+    .sort((a, b) => b.urgent - a.urgent || b.count - a.count);
+  const serveBar = st.tray.length
+    ? targets.length
+      ? `<div class="serve-to"><span class="label">Servir</span>${targets.map((x) => `<button type="button" class="${x.urgent ? "primary" : ""}" data-act="serve" data-table="${x.n}" ${busy ? "disabled" : ""}>Table ${x.n} <span class="num">· ${x.count}</span></button>`).join("")}</div>`
+      : `<p class="muted tray-hint">Aucune table n'attend ce qu'il y a sur le plateau.</p>`
+    : `<p class="muted tray-hint">Cliquez un plat du comptoir pour le charger.</p>`;
+
+  document.getElementById("server").innerHTML = `
+    <div class="status">
+      <span class="label">Vous jouez</span>
+      <div class="row">
+        <select data-act="pickMe" aria-label="Personnage">${Object.values(S.staff).map((s) => `<option value="${s.id}" ${s.id === st.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
+        ${st.busy ? `<span class="busy">${esc(st.name)} ${esc(st.busy.label)}…</span>` : tapping ? `<span class="busy">tire une chope…</span>` : `<span class="muted">${S.running ? "Libre" : "Le service n'a pas commencé : le MJ le lance depuis sa vue."}</span>`}
+      </div>
+      <span class="label">Occupé</span>
+      ${bar("busy", st.id, "neutral")}
+    </div>
+
+    <h3 class="section-title">Salle</h3>
+    <div class="tables">${tables}</div>
+
+    <h3 class="section-title">Postes</h3>
+    <div class="stations">
+      <div class="station">
+        <h3>Tireuse</h3>
+        <div class="row">
+          ${ORDERABLE.filter((m) => MENU[m].station === "tap").map((m) => `<label class="row"><input type="radio" name="drink" value="${m}" data-act="drink" ${S.ui.drink === m ? "checked" : ""}> ${esc(MENU[m].name)}</label>`).join("")}
+        </div>
+        <div class="tap-zone">
+          <div class="glass" aria-hidden="true"><div class="target"></div><div class="beer" data-live="beer"></div></div>
+          <div class="col" style="display:flex;flex-direction:column;gap:6px">
+            <button type="button" class="tap-btn ${tapping ? "holding" : ""}" data-tap ${(!S.running || (busy && !tapping) || tapOther) ? "disabled" : ""}>
+              ${tapOther ? `${esc(tapOther)} utilise la tireuse` : "Maintenir pour tirer"}</button>
+            <span class="muted" style="font-size:0.82rem">Relâchez dans la zone verte. Clavier : maintenir Espace.</span>
+            ${last}
+          </div>
+        </div>
+      </div>
+      <div class="station">
+        <h3>Cuisine</h3>
+        ${stove}
+      </div>
+      <div class="station">
+        <h3>Planche et cave</h3>
+        <div class="row">${boardBtns}</div>
+        ${board}
+      </div>
+    </div>
+
+    <div class="counter">
+      <section class="shelf" data-drop="pass" aria-label="Comptoir">
+        <header class="shelf-head"><h3 class="section-title">Comptoir</h3><span class="muted num">${S.pass.length} prêt${S.pass.length > 1 ? "s" : ""}</span></header>
+        <div class="dish-grid">${pass || `<p class="muted tray-hint">Les plats prêts arrivent ici.</p>`}</div>
+      </section>
+      <section class="shelf tray" data-drop="tray" aria-label="Plateau">
+        <header class="shelf-head"><h3 class="section-title">Plateau de ${esc(st.name)}</h3><span class="muted num">${st.tray.length}/${TRAY}</span></header>
+        <div class="tray-slots">${traySlots}</div>
+        ${serveBar}
+      </section>
+    </div>`;
+}
+
+function renderGM() {
+  const s = S.stats;
+  const sat = s.finished ? Math.round((100 * s.happy) / s.finished) : 100;
+  const rows = S.tables.map((tb) => {
+    const ticket = tb.ticket && S.tickets[tb.ticket];
+    if (!ticket) return `<tr><td>${tb.n}</td><td class="muted" colspan="3">libre${tb.reserved ? ` (${esc(S.actors[tb.reserved]?.name)} s'installe)` : ""}</td></tr>`;
+    const served = ticket.items.filter((it) => it.served).length;
+    return `<tr><td>${tb.n}</td><td>${esc(ticket.name)}</td>
+      <td>${ticket.phase === "bill" ? "attend l'addition" : `${served}/${ticket.items.length} servis`}</td>
+      <td>${ticket.kind === "player" ? `<span class="muted">joueur</span>` : bar("ticket", ticket.id)}</td></tr>`;
+  }).join("");
+  const staff = Object.values(S.staff).map((st) => `<tr><td>${esc(st.name)}</td>
+    <td>${st.busy ? esc(st.busy.label) : S.tap?.staff === st.id ? "tire une chope" : `<span class="muted">libre</span>`}</td>
+    <td>${st.tray.map((d) => esc(MENU[d.m].name)).join(", ") || `<span class="muted">plateau vide</span>`}</td></tr>`).join("");
+  const log = S.log.map((l) => `<li class="${l.kind}"><span class="num muted">${clock(l.t)}</span><span>${esc(l.text)}</span></li>`).join("");
+
+  document.getElementById("gm").innerHTML = `
+    <div class="row">
+      <button type="button" class="primary" data-act="toggleRun">${S.running ? "Pause" : S.t > 0 ? "Reprendre" : "Ouvrir le service"}</button>
+      <button type="button" data-act="endService" ${S.t > 0 ? "" : "disabled"}>Terminer le service</button>
+      <span class="label">Vitesse</span>
+      <div class="seg-group">${[1, 2].map((v) => `<button type="button" class="seg ${S.speed === v ? "on" : ""}" data-act="speed" data-v="${v}">×${v}</button>`).join("")}</div>
+    </div>
+    <div class="row">
+      <label class="row"><span class="label">Affluence</span>
+        <select data-act="rush">${[["calm", "Calme"], ["normal", "Normale"], ["rush", "Coup de feu"]].map(([v, l]) => `<option value="${v}" ${S.rush === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="row"><span class="label">Patience</span>
+        <input type="range" min="0.5" max="2" step="0.25" value="${S.patienceMul}" data-act="patience" aria-label="Patience des clients"><span class="num">×${S.patienceMul}</span></label>
+    </div>
+    <div class="row">
+      <span class="label">Événements</span>
+      <button type="button" data-act="addClient">Faire entrer un client</button>
+      <button type="button" data-act="addHurry">Client pressé</button>
+      <button type="button" data-act="addBig">Grande tablée</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="label">Servis</span><b>${s.served}</b></div>
+      <div class="stat"><span class="label">Partis</span><b>${s.failed + s.unpaid}</b></div>
+      <div class="stat"><span class="label">Recette</span><b>${fmt(s.revenue)}</b></div>
+      <div class="stat"><span class="label">Pourboires</span><b>${fmt(s.tips)}</b></div>
+      <div class="stat"><span class="label">Satisfaction</span><b>${sat} %</b></div>
+    </div>
+    <h3 class="section-title">Salle</h3>
+    <div class="scroll-x"><table class="gm-table"><thead><tr><th>Table</th><th>Client</th><th>État</th><th>Patience</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <h3 class="section-title">Personnel</h3>
+    <div class="scroll-x"><table class="gm-table"><thead><tr><th>Serveur</th><th>Fait</th><th>Plateau</th></tr></thead><tbody>${staff}</tbody></table></div>
+    <h3 class="section-title">Journal</h3>
+    <ul class="log">${log || `<li><span></span><span class="muted">Ouvrez le service pour faire entrer les premiers clients.</span></li>`}</ul>`;
+}
+
+function renderClient() {
+  const actor = S.actors[S.ui.client];
+  const table = clientTable();
+  const ticket = clientTicket();
+  let body;
+
+  if (!table) {
+    const free = S.tables.filter((tb) => !tb.ticket && !tb.reserved);
+    body = `<p class="notice">Choisissez une table libre pour vous installer.</p>
+      <div class="row">${free.map((tb) => `<button type="button" data-act="sit" data-table="${tb.n}">Table ${tb.n}</button>`).join("") || `<span class="muted">La salle est pleine.</span>`}</div>`;
+  } else if (!ticket) {
+    const cartTotal = Object.entries(S.clientCart).reduce((s, [m, q]) => s + MENU[m].price * q, 0);
+    body = `
+      ${table.paidNote ? `<p class="notice">${esc(table.paidNote)} Merci, revenez quand vous voulez !</p>` : ""}
+      <p class="label">Table ${table.n} · la carte</p>
+      <ul class="menu-list">${ORDERABLE.map((m) => {
+        const q = S.clientCart[m] ?? 0;
+        return `<li class="${q ? "in" : ""}"><span>${esc(MENU[m].name)}</span><span class="num">${fmt(MENU[m].price)}</span>
+          <span class="qty"><button type="button" data-act="dec" data-m="${m}" ${q ? "" : "disabled"} aria-label="Retirer">−</button><span>${q}</span><button type="button" data-act="inc" data-m="${m}" aria-label="Ajouter">+</button></span></li>`;
+      }).join("")}</ul>
+      <div class="row" style="justify-content:space-between"><span>Total : <strong class="num">${fmt(cartTotal)}</strong></span>
+        <span class="row"><button type="button" data-act="standUp">Quitter la table</button>
+        <button type="button" class="primary" data-act="order" ${cartTotal ? "" : "disabled"}>Commander</button></span></div>
+      <p class="muted" style="margin:0">Ici, la commande n'est pas automatique : elle part en salle et ce sont les serveurs qui la préparent.</p>`;
+  } else {
+    const served = ticket.items.filter((it) => it.served).length;
+    const steps = [
+      ["Commande prise", true, false],
+      [`Service en cours (${served}/${ticket.items.length})`, ticket.phase === "bill", ticket.phase === "order"],
+      [`Addition : ${fmt(total(ticket))}`, false, ticket.phase === "bill"]
+    ];
+    body = `
+      <p class="label">Table ${table.n} · votre commande</p>
+      <div class="row">${ticketNeeds(ticket)}</div>
+      <ul class="steps">${steps.map(([l, done, on]) => `<li class="${done ? "done" : on ? "on" : ""}"><span class="dot"></span>${esc(l)}</li>`).join("")}</ul>
+      ${ticket.phase === "bill" ? `<p class="notice">Tout est servi. Un serveur va venir encaisser ${fmt(total(ticket))}.</p>` : ""}
+      <div class="row"><button type="button" data-act="call" ${ticket.calling ? "disabled" : ""}>${ticket.calling ? "Serveur appelé" : "Appeler un serveur"}</button></div>`;
+  }
+
+  document.getElementById("client").innerHTML = `
+    <div class="status">
+      <span class="label">Vous êtes</span>
+      <div class="row"><select data-act="pickClient" aria-label="Client">${Object.entries(S.actors).map(([id, a]) => `<option value="${id}" ${id === S.ui.client ? "selected" : ""}>${esc(a.name)}</option>`).join("")}</select></div>
+      <span class="label">Bourse</span><span class="num">${fmt(actor.purse)}</span>
+    </div>
+    ${body}`;
+}
+
+let renderQueued = false;
+function render() {
+  if (renderQueued) return;
+  renderQueued = true;
+  requestAnimationFrame(() => {
+    renderQueued = false;
+    renderServer();
+    renderGM();
+    renderClient();
+    updateLive();
+  });
+}
+
+// Barres et horloge : mises à jour à chaque tic sans tout redessiner
+function updateLive() {
+  const c = document.getElementById("clock");
+  c.textContent = `${clock(S.t)} · ${S.running ? "service ouvert" : S.t > 0 ? "en pause" : "pas commencé"}`;
+  c.classList.toggle("paused", !S.running);
+  for (const el of document.querySelectorAll("[data-bar]")) {
+    const id = el.dataset.id;
+    let frac = 0;
+    let colored = false;
+    switch (el.dataset.bar) {
+      case "ticket": {
+        const tk = S.tickets[id];
+        frac = tk ? tk.patience / tk.patienceMax : 0;
+        colored = true;
+        break;
+      }
+      case "cook": {
+        const slot = S.stove[id];
+        frac = slot ? Math.min(1, (S.t - slot.start) / (slot.readyAt - slot.start)) : 0;
+        break;
+      }
+      case "burn": {
+        const slot = S.stove[id];
+        frac = slot ? Math.max(0, 1 - (S.t - slot.readyAt) / BURN) : 0;
+        colored = true;
+        break;
+      }
+      case "board": {
+        const slot = S.board[id];
+        frac = slot ? Math.min(1, (S.t - slot.start) / (slot.end - slot.start)) : 0;
+        break;
+      }
+      case "busy": {
+        const st = S.staff[id];
+        frac = st?.busy && st.busy.end < 9000 ? Math.min(1, (S.t - st.busy.start) / (st.busy.end - st.busy.start)) : st?.busy ? 1 : 0;
+        break;
+      }
+    }
+    el.firstElementChild.style.width = `${Math.max(0, frac) * 100}%`;
+    if (colored) el.className = `bar ${barClass(frac)}`;
+  }
+  const beer = document.querySelector("[data-live=beer]");
+  if (beer) {
+    const level = S.tap && S.tap.staff === me().id ? S.tap.level : 0;
+    beer.style.height = `${Math.min(100, level)}%`;
+    beer.innerHTML = level > 5 ? `<div class="foam" style="top:0"></div>` : "";
+  }
+}
+
+/* ============================================================
+   Événements de la page
+   ============================================================ */
+
+document.addEventListener("click", (event) => {
+  const tab = event.target.closest("[data-tab]");
+  if (tab) {
+    S.ui.tab = tab.dataset.tab;
+    for (const b of document.querySelectorAll("[data-tab]")) {
+      b.classList.toggle("on", b === tab);
+      b.setAttribute("aria-selected", b === tab);
+    }
+    for (const v of document.querySelectorAll("[data-view]")) v.classList.toggle("active", v.dataset.view === S.ui.tab);
+    return;
+  }
+  const el = event.target.closest("button[data-act]");
+  if (!el || el.disabled) return;
+  ACTIONS[el.dataset.act]?.(el);
+  render();
+});
+
+document.addEventListener("change", (event) => {
+  const el = event.target;
+  if (el.id === "side") {
+    document.getElementById("views").classList.toggle("side", el.checked);
+    render();
+    return;
+  }
+  if (el.dataset?.act && (el.tagName === "SELECT" || el.type === "radio")) {
+    ACTIONS[el.dataset.act]?.(el);
+    render();
+  }
+});
+document.addEventListener("input", (event) => {
+  if (event.target.dataset?.act === "patience") {
+    ACTIONS.patience(event.target);
+    event.target.nextElementSibling.textContent = `×${S.patienceMul}`;
+  }
+});
+
+document.addEventListener("pointerdown", (event) => {
+  const btn = event.target.closest("[data-tap]");
+  if (!btn || btn.disabled) return;
+  event.preventDefault();
+  tapStart();
+});
+for (const type of ["pointerup", "pointercancel"]) document.addEventListener(type, () => tapEnd());
+document.addEventListener("keydown", (event) => {
+  if (event.code === "Space" && event.target.closest?.("[data-tap]") && !event.repeat) {
+    event.preventDefault();
+    tapStart();
+  }
+});
+document.addEventListener("keyup", (event) => {
+  if (event.code === "Space" && S.tap) {
+    event.preventDefault();
+    tapEnd();
+    document.querySelector("[data-tap]")?.focus();
+  }
+});
+
+/* ---- Glisser-déposer entre les zones (souris et tactile) ---- */
+
+const fake = (dataset) => ({ dataset });
+
+function performDrop(src, dst) {
+  const [kind, id] = src.split(":");
+  const [zone, target] = (dst ?? "").split(":");
+  if (!zone) return;
+  const st = me();
+  if (kind === "pass") {
+    if (zone === "tray") ACTIONS.take(fake({ uid: id }));
+    if (zone === "table") {
+      if (isBusy(st)) return toast(`${st.name} est occupé.`, "bad");
+      if (st.tray.length >= TRAY) return toast("Le plateau est plein.", "bad");
+      ACTIONS.take(fake({ uid: id }));
+      ACTIONS.serve(fake({ table: target }));
+    }
+  }
+  if (kind === "tray") {
+    if (zone === "pass") ACTIONS.drop(fake({ uid: id }));
+    if (zone === "table") {
+      if (isBusy(st)) return toast(`${st.name} est occupé.`, "bad");
+      ACTIONS.serve(fake({ table: target }));
+    }
+  }
+  if (kind === "stove" && (zone === "pass" || zone === "tray")) {
+    if (isBusy(st)) return toast(`${st.name} est occupé.`, "bad");
+    const before = S.pass.length;
+    ACTIONS.takeOut(fake({ slot: id }));
+    if (zone === "tray" && S.pass.length > before) {
+      if (st.tray.length >= TRAY) toast("Plateau plein : le plat reste au comptoir.", "bad");
+      else ACTIONS.take(fake({ uid: S.pass[S.pass.length - 1].uid }));
+    }
+  }
+}
+
+let drag = null;
+let suppressClick = false;
+
+function dropZoneAt(x, y) {
+  return document.elementFromPoint(x, y)?.closest("[data-drop]") ?? null;
+}
+
+document.addEventListener("pointerdown", (event) => {
+  const el = event.target.closest("[data-drag]");
+  if (!el || event.button > 0 || el.disabled) return;
+  drag = { src: el.dataset.drag, label: el.dataset.label ?? el.textContent.trim(), x: event.clientX, y: event.clientY, active: false, ghost: null, hover: null };
+});
+
+document.addEventListener("pointermove", (event) => {
+  if (!drag) return;
+  if (!drag.active) {
+    if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 6) return;
+    drag.active = true;
+    drag.ghost = document.createElement("div");
+    drag.ghost.className = "chip drag-ghost";
+    drag.ghost.textContent = drag.label;
+    document.body.append(drag.ghost);
+    document.body.classList.add("dragging");
+  }
+  drag.ghost.style.transform = `translate(${event.clientX + 12}px, ${event.clientY + 12}px)`;
+  const zone = dropZoneAt(event.clientX, event.clientY);
+  for (const z of document.querySelectorAll(".drop-hover")) if (z !== zone) z.classList.remove("drop-hover");
+  zone?.classList.add("drop-hover");
+});
+
+function endDrag(event, cancelled) {
+  if (!drag) return;
+  const d = drag;
+  drag = null;
+  if (!d.active) return;
+  d.ghost.remove();
+  document.body.classList.remove("dragging");
+  for (const z of document.querySelectorAll(".drop-hover")) z.classList.remove("drop-hover");
+  suppressClick = true;
+  setTimeout(() => (suppressClick = false), 0);
+  if (cancelled) return;
+  performDrop(d.src, dropZoneAt(event.clientX, event.clientY)?.dataset.drop);
+  render();
+}
+document.addEventListener("pointerup", (event) => endDrag(event, false));
+document.addEventListener("pointercancel", (event) => endDrag(event, true));
+document.addEventListener("keydown", (event) => { if (event.key === "Escape" && drag?.active) endDrag(event, true); });
+
+// Un glisser ne doit pas aussi compter comme un clic
+document.addEventListener("click", (event) => {
+  if (!suppressClick) return;
+  suppressClick = false;
+  event.stopPropagation();
+  event.preventDefault();
+}, true);
+
+/* ---- Démarrage : un service déjà lancé, pour voir tout de suite ---- */
+newTicket(S.tables[1], { name: "Gaspard le meunier", items: ["biere", "pain"] });
+newTicket(S.tables[3], { name: "Deux gardes", items: ["biere", "biere", "ragout"] });
+S.stove[0] = { m: "ragout", readyAt: 10, state: "cooking", start: 0 };
+S.pass.push({ uid: S.seq++, m: "biere", perfect: true });
+S.tables[4].reserved = "bruno";
+log("Le service commence.");
+S.running = true;
+S.nextArrival = 14;
+render();
+</script>

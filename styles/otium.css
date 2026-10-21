@@ -252,3 +252,672 @@
 .otium-chat .otium-chat-note {
   font-style: italic;
 }
+
+/* ---- Réglages d'une taverne : colonne Service ---- */
+
+.otium-config .otium-service-cell {
+  white-space: nowrap;
+}
+
+.otium-config .otium-service-cell select {
+  width: auto;
+}
+
+.otium-config .otium-prep {
+  width: 4rem;
+  display: none;
+}
+
+.otium-config .otium-row[data-station="stove"] .otium-prep,
+.otium-config .otium-row[data-station="board"] .otium-prep {
+  display: inline-block;
+}
+
+/* ============================================ */
+/*  Mode Service                                */
+/* ============================================ */
+
+.otium-service {
+  --otium-line: rgba(128, 128, 128, 0.35);
+  --otium-panel: rgba(128, 128, 128, 0.08);
+  --otium-ok: #3c9a63;
+  --otium-ok-soft: rgba(60, 154, 99, 0.16);
+  --otium-warn: #cf9a2c;
+  --otium-stove: #c0683a;
+}
+
+.otium-service .otium-body {
+  gap: 0.75rem;
+}
+
+.otium-service .notice {
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--otium-line);
+  background: var(--otium-panel);
+}
+
+.otium-service .otium-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.otium-service .otium-row > button,
+.otium-service .otium-footer button {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.otium-service button.otium-primary {
+  background: var(--otium-accent);
+  border-color: var(--otium-accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.otium-service .otium-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+  border: 0;
+}
+
+.otium-service .otium-section::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--otium-line);
+}
+
+.otium-service .otium-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.75;
+}
+
+.otium-service .otium-clock {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85em;
+}
+
+/* Jauges */
+.otium-service .otium-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--otium-line);
+  overflow: hidden;
+}
+
+.otium-service .otium-bar > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--otium-ok);
+  transition: width 0.1s linear;
+}
+
+.otium-service .otium-bar.neutral > i {
+  background: var(--otium-accent);
+}
+
+.otium-service .otium-bar.mid > i {
+  background: var(--otium-warn);
+}
+
+.otium-service .otium-bar.low > i {
+  background: var(--otium-danger);
+}
+
+/* Pastilles */
+.otium-service .otium-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.otium-service .otium-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--otium-accent-soft);
+}
+
+.otium-service .otium-chip.done {
+  background: var(--otium-ok-soft);
+  color: var(--otium-ok);
+  text-decoration: line-through;
+}
+
+.otium-service .otium-chip.perfect {
+  box-shadow: inset 0 0 0 1px var(--otium-ok);
+}
+
+.otium-service .otium-chip.bad {
+  color: var(--otium-danger);
+}
+
+/* Statut du serveur */
+.otium-server .otium-status {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--otium-line);
+  background: var(--otium-panel);
+}
+
+.otium-server .otium-status-bar {
+  grid-column: 1 / -1;
+}
+
+.otium-server .otium-busy {
+  color: var(--otium-accent);
+  font-weight: 600;
+}
+
+/* Caisse */
+.otium-server .otium-cash {
+  border: 2px solid var(--otium-accent);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--otium-accent-soft);
+}
+
+.otium-server .otium-cash h3 {
+  margin: 0;
+  border: 0;
+}
+
+.otium-server .otium-cash-lines {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.2rem 1rem;
+}
+
+.otium-server .otium-cash-change {
+  font-size: 1.25em;
+}
+
+/* Salle */
+.otium-server .otium-tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.5rem;
+}
+
+.otium-server .otium-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--otium-line);
+  background: var(--otium-panel);
+}
+
+.otium-server .otium-table.empty {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.otium-server .otium-table.bill {
+  border-color: var(--otium-accent);
+}
+
+.otium-server .otium-table.calling {
+  box-shadow: 0 0 0 2px var(--otium-accent);
+}
+
+.otium-server .otium-table header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.otium-server .otium-who {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.otium-server .otium-table-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.otium-server .otium-table-actions button {
+  flex: 1;
+}
+
+/* Postes */
+.otium-server .otium-stations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.otium-server .otium-station {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--otium-line);
+}
+
+.otium-server .otium-station h4 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.otium-server .otium-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.otium-server .otium-tap {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 0.6rem;
+}
+
+.otium-server .otium-glass {
+  position: relative;
+  height: 110px;
+  overflow: hidden;
+  border: 2px solid var(--otium-line);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+.otium-server .otium-target {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 75%;
+  height: 15%;
+  background: var(--otium-ok-soft);
+  border-top: 1px dashed var(--otium-ok);
+  border-bottom: 1px dashed var(--otium-ok);
+}
+
+.otium-server .otium-beer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+  background: linear-gradient(to top, #c98a1a, #e9b44c);
+  border-top: 0 solid #f3ead7;
+}
+
+.otium-server .otium-tap-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.otium-server .otium-tap-btn {
+  min-height: 56px;
+  font-weight: 600;
+  touch-action: none;
+  user-select: none;
+}
+
+.otium-server .otium-tap-btn.holding {
+  background: var(--otium-accent);
+  color: #fff;
+}
+
+.otium-server .otium-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border: 1px dashed var(--otium-line);
+}
+
+.otium-server .otium-slot.ready {
+  border-style: solid;
+  border-color: var(--otium-ok);
+}
+
+.otium-server .otium-slot.burnt {
+  border-style: solid;
+  border-color: var(--otium-danger);
+}
+
+/* Comptoir et plateau */
+.otium-server .otium-counter {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 0.6rem;
+}
+
+.otium-server .otium-shelf {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--otium-line);
+  background: var(--otium-panel);
+}
+
+.otium-server .otium-shelf header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.otium-server .otium-shelf header .otium-section {
+  flex: 1;
+  margin: 0;
+}
+
+.otium-server .otium-dish-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.4rem;
+}
+
+.otium-server .otium-dish {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.1rem;
+  min-height: 50px;
+  width: 100%;
+  padding: 0.35rem 0.6rem 0.35rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--otium-line);
+  text-align: left;
+  box-shadow: inset 4px 0 0 var(--otium-station, var(--otium-line));
+}
+
+.otium-server .otium-dish.st-tap {
+  --otium-station: var(--otium-accent);
+}
+
+.otium-server .otium-dish.st-stove {
+  --otium-station: var(--otium-stove);
+}
+
+.otium-server .otium-dish.st-board {
+  --otium-station: var(--otium-ok);
+}
+
+.otium-server .otium-dish-name {
+  font-weight: 600;
+  line-height: 1.2;
+  padding-right: 1.4rem;
+}
+
+.otium-server .otium-dish-tag {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--otium-ok);
+}
+
+.otium-server .otium-dish-count {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.45rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--otium-accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.otium-server .otium-tray-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.otium-server .otium-tray-slot.empty {
+  display: grid;
+  place-items: center;
+  min-height: 50px;
+  border-radius: 6px;
+  border: 1px dashed var(--otium-line);
+  opacity: 0.7;
+  font-size: 0.85rem;
+}
+
+.otium-server .otium-dish-remove {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  padding: 0;
+  line-height: 1;
+  border-radius: 50%;
+}
+
+.otium-server .otium-serve-to {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.otium-server .otium-serve-to button {
+  width: auto;
+}
+
+/* Glisser-déposer */
+.otium-server [data-drag] {
+  cursor: grab;
+  touch-action: none;
+}
+
+.otium-server.otium-dragging,
+.otium-server.otium-dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+.otium-server.otium-dragging [data-drop] {
+  outline: 2px dashed var(--otium-accent);
+  outline-offset: 2px;
+}
+
+.otium-server.otium-dragging [data-drop].drop-hover {
+  outline-style: solid;
+  background: var(--otium-accent-soft);
+}
+
+.otium-drag-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10000;
+  pointer-events: none;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--otium-accent, #c8923a);
+  color: #fff;
+  font-size: 0.85rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+/* Vue MJ */
+.otium-service-gm .otium-gm-tavern {
+  margin: 0;
+}
+
+.otium-service .otium-seg {
+  display: inline-flex;
+}
+
+.otium-service .otium-seg button {
+  width: auto;
+  border-radius: 0;
+}
+
+.otium-service .otium-seg button.active {
+  background: var(--otium-accent);
+  color: #fff;
+}
+
+.otium-service .otium-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.4rem;
+}
+
+.otium-service .otium-stats > div {
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--otium-line);
+  background: var(--otium-panel);
+}
+
+.otium-service .otium-stats b {
+  display: block;
+  font-size: 1.15em;
+  font-variant-numeric: tabular-nums;
+}
+
+.otium-service .otium-scroll {
+  overflow-x: auto;
+}
+
+.otium-service .otium-grid {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+}
+
+.otium-service .otium-grid th {
+  text-align: left;
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.otium-service .otium-grid td,
+.otium-service .otium-grid th {
+  padding: 0.25rem 0.35rem;
+  border-bottom: 1px solid var(--otium-line);
+}
+
+.otium-service .otium-grid td .otium-bar {
+  min-width: 60px;
+}
+
+.otium-service .otium-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.88rem;
+}
+
+.otium-service .otium-log li {
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 1fr);
+  gap: 0.4rem;
+}
+
+.otium-service .otium-log li.good span:last-child {
+  color: var(--otium-ok);
+}
+
+.otium-service .otium-log li.bad span:last-child {
+  color: var(--otium-danger);
+}
+
+.otium-service .otium-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--otium-accent);
+}
+
+.otium-service .otium-summary h3,
+.otium-service .otium-summary p {
+  margin: 0;
+}
+
+/* Vue Client */
+.otium-service-client .otium-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.otium-service-client .otium-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.otium-service-client .otium-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--otium-line);
+}
+
+.otium-service-client .otium-steps li.on .otium-dot {
+  background: var(--otium-accent);
+}
+
+.otium-service-client .otium-steps li.done .otium-dot {
+  background: var(--otium-ok);
+}
+
+@media (max-width: 900px) {
+  .otium-server .otium-stations,
+  .otium-server .otium-counter {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .otium-service .otium-bar > i {
+    transition: none;
+  }
+}

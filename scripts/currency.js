@@ -59,6 +59,25 @@ export function pay(wallet, cost) {
   return w;
 }
 
+/** Ajoute `cp` pièces de cuivre à une bourse, en po, pa et pc. */
+export function receive(wallet, cp) {
+  const w = {};
+  for (const d of DENOMS) w[d] = Math.max(0, Math.floor(Number(wallet?.[d]) || 0));
+  let rest = Math.max(0, Math.floor(cp));
+  for (const d of DISPLAY) {
+    const v = cpValue(d);
+    const n = Math.floor(rest / v);
+    w[d] += n;
+    rest -= n * v;
+  }
+  return w;
+}
+
+/** Somme tendue par un client pour régler `due` pc : la pièce d'or au-dessus. */
+export function cashGiven(due) {
+  return due < 100 ? 100 : Math.ceil((due + 1) / 100) * 100;
+}
+
 /** Abréviation localisée d'une pièce (po, pa, pc… en français). */
 export function abbr(denom) {
   const key = globalThis.CONFIG?.DND5E?.currencies?.[denom]?.abbreviation;
