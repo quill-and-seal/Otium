@@ -1,5 +1,13 @@
 # Journal des versions
 
+## 0.1.5
+
+Corrections des réglages d'une taverne.
+
+- Les fenêtres d'Otium ne dépassent plus de l'écran : leur contenu **défile** (la carte d'une taverne était impossible à faire défiler)
+- Les **noms des articles** ne s'effacent plus en modifiant la carte : le formulaire est lu champ par champ, et un champ absent garde sa valeur
+- Mise en page de la carte : prix et monnaie alignés sur la ligne, description sur toute la largeur, boutons de ligne côte à côte
+
 ## 0.1.4
 
 L'onglet du MJ et l'encart des postes.

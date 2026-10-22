@@ -12,6 +12,17 @@
   gap: 0.5rem;
 }
 
+/* Fenêtres : jamais plus hautes que l'écran, le contenu défile */
+.application.otium:not(.otium-sidebar) {
+  max-height: calc(100vh - 2rem);
+}
+
+.application.otium:not(.otium-sidebar) .window-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .otium .hint {
   opacity: 0.75;
   font-size: 0.9em;
@@ -1199,4 +1210,38 @@
   #otium-zone-card {
     transition: none;
   }
+}
+
+/* ---- Réglages d'une taverne : mise en page ---- */
+
+.otium-config .form-group.stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+.otium-config .form-group.stacked textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.otium-config .otium-menu-table td {
+  vertical-align: middle;
+}
+
+.otium-config .otium-menu-table td:first-child {
+  min-width: 12rem;
+}
+
+.otium-config .otium-row-actions {
+  display: table-cell;
+}
+
+.otium-config .otium-row-actions button {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  margin: 0 1px;
 }

@@ -380,6 +380,19 @@ export class TavernList extends OtiumApp {
 /*  Réglages d'une taverne (MJ)                 */
 /* ============================================ */
 
+/** Valeurs d'un formulaire, clé par clé (« menu.<id>.name » → valeur). */
+function readForm(form) {
+  const out = {};
+  for (const el of form?.querySelectorAll?.("[name]") ?? []) {
+    if (el.disabled || !el.name) continue;
+    if (el.type === "checkbox") out[el.name] = el.checked;
+    else if (el.type === "radio") {
+      if (el.checked) out[el.name] = el.value;
+    } else out[el.name] = el.value;
+  }
+  return out;
+}
+
 export class TavernConfig extends OtiumApp {
   constructor(tavernId, options = {}) {
     super({ id: `otium-config-${tavernId}`, ...options });
@@ -426,10 +439,10 @@ export class TavernConfig extends OtiumApp {
         <tr class="otium-row" data-item-id="${item.id}" data-category="${item.category}" data-station="${item.station}">
           <td><input type="text" name="${p}.name" value="${esc(item.name)}" placeholder="${esc(t("Item.Unnamed"))}"></td>
           <td><select name="${p}.category" class="otium-category">${opts(CATEGORIES, item.category, (c) => t(`Category.${c}`))}</select></td>
-          <td class="otium-price-cell">
+          <td><div class="otium-price-cell">
             <input type="number" name="${p}.priceValue" value="${item.price.value}" min="0" step="any">
             <select name="${p}.priceDenom">${opts(DENOMS, item.price.denom, abbr)}</select>
-          </td>
+          </div></td>
           <td><input type="number" name="${p}.stock" value="${item.stock ?? ""}" min="0" step="1" placeholder="∞"></td>
           <td class="otium-fx">
             <select class="fx-drink" name="${p}.alcohol" data-tooltip="${esc(t("Effects.AlcoholTip"))}">${opts([0, 1, 2, 3], item.alcohol, (n) => t(`Alcohol.${n}`))}</select>
@@ -505,10 +518,11 @@ export class TavernConfig extends OtiumApp {
     });
   }
 
-  static async #onSubmit(event, form, formData) {
+  static async #onSubmit(event, form) {
     const tavern = this.tavern;
     if (!tavern) return;
-    const data = foundry.utils.expandObject(formData.object);
+    // Lecture directe des champs : ne dépend pas de la façon dont Foundry découpe le formulaire
+    const data = foundry.utils.expandObject(readForm(form ?? this.element));
     tavern.name = String(data.name ?? tavern.name);
     tavern.keeper = String(data.keeper ?? tavern.keeper);
     tavern.description = String(data.description ?? tavern.description);
@@ -517,17 +531,19 @@ export class TavernConfig extends OtiumApp {
     tavern.menu = tavern.menu.map((item) => {
       const r = rows[item.id];
       if (!r) return item;
+      // Un champ absent du formulaire garde sa valeur : rien ne s'efface par accident
+      const keep = (value, fallback) => (value === undefined ? fallback : value);
       return newItem({
         ...item,
-        name: r.name,
-        category: r.category,
-        price: { value: r.priceValue, denom: r.priceDenom },
-        stock: r.stock,
-        alcohol: r.alcohol,
-        tempHp: r.tempHp,
-        rest: r.rest,
-        station: r.station,
-        prepTime: r.prepTime
+        name: keep(r.name, item.name),
+        category: keep(r.category, item.category),
+        price: { value: keep(r.priceValue, item.price.value), denom: keep(r.priceDenom, item.price.denom) },
+        stock: keep(r.stock, item.stock),
+        alcohol: keep(r.alcohol, item.alcohol),
+        tempHp: keep(r.tempHp, item.tempHp),
+        rest: keep(r.rest, item.rest),
+        station: keep(r.station, item.station),
+        prepTime: keep(r.prepTime, item.prepTime)
       });
     });
     // Pas de redessin de cette fenêtre : on garderait mal le focus en tabulant
