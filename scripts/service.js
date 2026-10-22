@@ -672,6 +672,7 @@ export async function applyOp(user, op) {
     // Postes de service (Régions) : l'action doit être faite depuis un poste qui l'autorise
     const zoneOp = op.type === "serve" && op.uid !== undefined ? "take" : op.type;
     const missing = missingZone(s.sceneId, st.id, zoneOp);
+    if (missing === "any") return notice(user, "Service.Notice.NotInStation", { name: st.name });
     if (missing) return notice(user, "Service.Notice.NotHere", { name: st.name, zone: t(`Zone.${missing}`) });
   }
 
@@ -752,11 +753,23 @@ const OPS = {
     const i = Number(op.slot);
     const slot = s.stove[i];
     if (!slot || slot.state !== "ready") return notice(user, "Service.Notice.Unavailable");
+    // Envoyé directement à une table : la table doit attendre ce plat, et il faut une place sur le plateau
+    let target = null;
+    if (op.table !== undefined) {
+      const table = s.tables.find((tb) => tb.n === Number(op.table));
+      const ticket = table?.ticket && s.tickets[table.ticket];
+      if (!ticket || ticket.phase !== "order" || !ticket.items.some((it) => !it.served && it.m === slot.m)) {
+        return notice(user, "Service.Notice.NotWaiting", { n: Number(op.table) });
+      }
+      if (st.tray.length >= SERVICE.tray) return notice(user, "Service.Notice.TrayFull");
+      target = table.n;
+    }
     const dish = { uid: s.seq++, m: slot.m, perfect: s.t - slot.readyAt < SERVICE.perfectTakeOut };
     s.stove[i] = null;
-    if (op.toTray && st.tray.length < SERVICE.tray) st.tray.push(dish);
+    if ((op.toTray || target !== null) && st.tray.length < SERVICE.tray) st.tray.push(dish);
     else s.pass.push(dish);
-    setBusy(st, "TakeOut", {}, 0.5);
+    if (target !== null) setBusy(st, "Walk", { n: target }, 0.5 + SERVICE.walk, { type: "serve", table: target });
+    else setBusy(st, "TakeOut", {}, 0.5);
   },
   trash: ({ s, op }) => {
     const i = Number(op.slot);

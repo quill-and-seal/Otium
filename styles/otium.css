@@ -653,6 +653,11 @@
   height: 0;
   background: linear-gradient(to top, #c98a1a, #e9b44c);
   border-top: 0 solid #f3ead7;
+  will-change: height;
+}
+
+.otium-server .otium-beer.foam {
+  border-top-width: 6px;
 }
 
 .otium-server .otium-tap-side {
@@ -1347,4 +1352,30 @@
   text-align: right;
   opacity: 0.7;
   font-variant-numeric: tabular-nums;
+}
+
+/* ---- Cuisine : envoyer un plat directement à une table ---- */
+
+.otium-server .otium-send {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.otium-server .otium-send button {
+  flex: 1 1 auto;
+  width: auto;
+  font-size: 0.85em;
+}
+
+/* ---- Onglet MJ : afficher les postes ---- */
+
+.otium-sidebar .otium-zones-toggle {
+  width: 100%;
+}
+
+.otium-sidebar .otium-zones-toggle.active {
+  border-color: var(--otium-accent);
+  color: var(--otium-accent);
 }

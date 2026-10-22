@@ -18,7 +18,8 @@ export const STATION_BEHAVIOR = `${MODULE_ID}.station`;
 
 /** Action du poste nécessaire pour chaque opération du service (absente : permise partout). */
 export const OP_ZONE = Object.freeze({
-  take: "pass",
+  // Prendre un plat au comptoir et le porter : depuis n'importe quel poste (le cuisinier sert aussi)
+  take: "any",
   tap: "tap",
   launch: "stove",
   takeOut: "stove",
@@ -166,6 +167,7 @@ export function missingZone(sceneId, actorId, opType) {
   const need = OP_ZONE[opType];
   if (!need) return null;
   const allowed = zoneActions(sceneId, actorId);
-  if (!allowed || allowed.has(need)) return null;
-  return need;
+  if (!allowed) return null;
+  if (need === "any") return allowed.size ? null : "any";
+  return allowed.has(need) ? null : need;
 }

@@ -2,8 +2,11 @@
 
 ## 0.1.6
 
-Le nombre et les noms des tables.
+Les tables, les postes vus par le MJ et une cuisine qui sert.
 
+- **Postes visibles pour le MJ** : sur la scène, chaque poste de service est dessiné avec une couleur par type (cuisine, tireuse, planche et cave, caisse, comptoir, table) et une étiquette avec son nom, ses tâches et, pendant un service, les personnages qui s'y trouvent. Seul le MJ le voit ; bouton *Afficher / Masquer les postes sur la scène* dans l'onglet Otium
+- **Le cuisinier sert** : le comptoir et le plateau sont accessibles depuis n'importe quel poste. En cuisine, un plat prêt propose **Envoyer à** les tables qui l'attendent : il est sorti du feu et porté directement au client. Il peut aussi se glisser du feu jusqu'à une table
+- **Tireuse fluide** : la chope se remplit image par image, et la fenêtre ne se redessine plus pendant qu'on tire (l'animation sautait)
 - Le champ du nombre de tables est remplacé par un compteur **− n +**, dans l'onglet MJ et la vue MJ. Le choix est **enregistré** pour le monde : il ne revient plus à 6 quand l'onglet se redessine
 - Le nombre de tables se change aussi **pendant un service** : « + » ajoute une table, « − » retire la dernière si elle est libre
 - Il y a toujours au moins autant de tables que le plus grand numéro de table posé en zone sur la scène

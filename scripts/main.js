@@ -19,6 +19,7 @@ import { ServiceClientApp, openServiceServer, openServiceGM, openServiceClient }
 import { registerStationBehavior, onZoneEvent, STATION_BEHAVIOR } from "./zones.js";
 import { registerSidebarTab, hasSidebarTab, TAB_NAME } from "./sidebar.js";
 import { zoneEntered, zoneLeft, refreshZoneCard, CORNERS } from "./banner.js";
+import { refreshZoneOverlay, clearZoneOverlay } from "./zone-overlay.js";
 
 /* -------------------------------------------- */
 /*  Initialisation                              */
@@ -33,6 +34,20 @@ Hooks.once("init", () => {
     type: Object,
     default: {},
     onChange: () => refreshApps()
+  });
+
+  // Postes de service dessinés sur la scène pour le MJ (bouton de l'onglet Otium)
+  game.settings.register(MODULE_ID, "showZones", {
+    name: "OTIUM.Settings.ShowZones.Name",
+    hint: "OTIUM.Settings.ShowZones.Hint",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: () => {
+      refreshZoneOverlay();
+      refreshApps();
+    }
   });
 
   // Nombre de tables du prochain service (choisi par le MJ dans l'onglet Otium)
@@ -247,13 +262,25 @@ function refreshServiceApps() {
 
 Hooks.on("updateToken", (token, changes) => {
   if (!getService()) return;
-  if ("x" in changes || "y" in changes || "elevation" in changes) refreshServiceApps();
+  if ("x" in changes || "y" in changes || "elevation" in changes) {
+    refreshServiceApps();
+    if (game.user.isGM) refreshZoneOverlay();
+  }
 });
 for (const hook of ["createRegionBehavior", "updateRegionBehavior", "deleteRegionBehavior"]) {
   Hooks.on(hook, (behavior) => {
-    if (behavior.type === STATION_BEHAVIOR && getService()) refreshServiceApps();
+    if (behavior.type !== STATION_BEHAVIOR) return;
+    if (game.user.isGM) refreshZoneOverlay();
+    if (getService()) refreshServiceApps();
   });
 }
+// Région déplacée, redessinée ou renommée : le dessin du MJ suit
+for (const hook of ["createRegion", "updateRegion", "deleteRegion"]) {
+  Hooks.on(hook, () => {
+    if (game.user.isGM) refreshZoneOverlay();
+  });
+}
+Hooks.on("canvasTearDown", () => clearZoneOverlay());
 
 /* -------------------------------------------- */
 /*  Synchronisation                             */
@@ -271,7 +298,10 @@ Hooks.on("updateScene", (scene, changes) => {
   }
 });
 
-Hooks.on("canvasReady", () => refreshApps());
+Hooks.on("canvasReady", () => {
+  refreshApps();
+  if (game.user.isGM) refreshZoneOverlay();
+});
 
 // Bourse ou ivresse d'un personnage modifiée : les cartes qui l'affichent suivent
 Hooks.on("updateActor", (actor) => {

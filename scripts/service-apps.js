@@ -203,6 +203,7 @@ export class ServiceServerApp extends ServiceApp {
       leave: ServiceServerApp.#onLeave,
       launch: ServiceServerApp.#op("launch", ["slot", "m"]),
       takeOut: ServiceServerApp.#op("takeOut", ["slot"]),
+      sendDish: ServiceServerApp.#op("takeOut", ["slot", "table"]),
       trash: ServiceServerApp.#op("trash", ["slot"]),
       prep: ServiceServerApp.#op("prep", ["m"]),
       take: ServiceServerApp.#op("take", ["uid"]),
@@ -281,13 +282,17 @@ export class ServiceServerApp extends ServiceApp {
 
   /** L'action est-elle permise là où se trouve le jeton ? */
   can(action) {
-    return !this.allowed || this.allowed.has(action);
+    if (!this.allowed) return true;
+    // Le comptoir est accessible depuis n'importe quel poste : le cuisinier peut porter ses plats
+    if (action === "pass") return this.allowed.size > 0;
+    return this.allowed.has(action);
   }
 
   /** Bandeau « placez votre jeton » d'un poste qui n'est pas accessible d'ici. */
   _lockHtml(action) {
     if (this.can(action)) return "";
-    return `<p class="otium-lock"><i class="fa-solid fa-location-dot"></i> ${L("Zone.MoveTo", { zone: t(`Zone.${action}`) })}</p>`;
+    const text = action === "pass" ? L("Zone.MoveToAny") : L("Zone.MoveTo", { zone: t(`Zone.${action}`) });
+    return `<p class="otium-lock"><i class="fa-solid fa-location-dot"></i> ${text}</p>`;
   }
 
   _statusHtml(s, st, now, busy) {
@@ -396,9 +401,19 @@ export class ServiceServerApp extends ServiceApp {
         const name = esc(menuItem(s, slot.m)?.name);
         if (slot.state === "cooking") return `<div class="otium-slot"><span class="otium-label">${L("Station.Fire", { n })} · ${name}</span>${bar("cook", i, "neutral")}</div>`;
         if (slot.state === "ready") {
+          // Tables qui attendent ce plat : le cuisinier peut l'envoyer directement
+          const waiting = s.tables
+            .map((tb) => ({ tb, ticket: tb.ticket && s.tickets[tb.ticket] }))
+            .filter(({ ticket }) => ticket && ticket.phase === "order" && ticket.items.some((it) => !it.served && it.m === slot.m))
+            .sort((a, b) => a.ticket.created - b.ticket.created)
+            .slice(0, 3);
+          const send = waiting
+            .map(({ tb }) => `<button type="button" data-action="sendDish" data-slot="${i}" data-table="${tb.n}" ${disabled ? "disabled" : ""} data-tooltip="${esc(L("Station.SendTip"))}"><i class="fa-solid fa-person-walking-arrow-right"></i> ${esc(tableName(tb.n))}</button>`)
+            .join("");
           return `<div class="otium-slot ready" data-drag="stove:${i}" data-label="${name}">
             <span class="otium-label">${L("Station.Fire", { n })} · ${L("Station.Ready")}</span>${bar("burn", i)}
-            <button type="button" class="otium-primary" data-action="takeOut" data-slot="${i}" ${disabled ? "disabled" : ""}>${L("Station.TakeOut", { dish: name })}</button></div>`;
+            <button type="button" class="otium-primary" data-action="takeOut" data-slot="${i}" ${disabled ? "disabled" : ""}>${L("Station.TakeOut", { dish: name })}</button>
+            ${send ? `<div class="otium-send"><span class="otium-label">${L("Station.SendTo")}</span>${send}</div>` : ""}</div>`;
         }
         return `<div class="otium-slot burnt"><span class="otium-label">${L("Station.Fire", { n })} · ${L("Station.Burnt")}</span>
           <button type="button" data-action="trash" data-slot="${i}" ${this.can("stove") ? "" : "disabled"}>${L("Station.Trash")}</button></div>`;
@@ -441,7 +456,7 @@ export class ServiceServerApp extends ServiceApp {
       .map((g) => {
         const item = menuItem(s, g.m);
         return `<button type="button" class="otium-dish st-${item?.station}" data-action="take" data-uid="${g.uids[0]}" data-drag="pass:${g.uids[0]}" data-label="${esc(item?.name)}"
-          ${trayFull || passLocked ? "disabled" : ""} data-tooltip="${esc(passLocked ? L("Zone.MoveTo", { zone: t("Zone.pass") }) : trayFull ? L("Counter.TrayFull") : L("Counter.TakeHint"))}">
+          ${trayFull || passLocked ? "disabled" : ""} data-tooltip="${esc(passLocked ? L("Zone.MoveToAny") : trayFull ? L("Counter.TrayFull") : L("Counter.TakeHint"))}">
           ${dishTile(g.m, g.perfect, g.uids.length > 1 ? `<span class="otium-dish-count">×${g.uids.length}</span>` : "")}</button>`;
       })
       .join("");
@@ -499,14 +514,13 @@ export class ServiceServerApp extends ServiceApp {
       </div>`;
   }
 
-  updateLive() {
-    super.updateLive();
-    const beer = this.element?.querySelector("[data-otium-beer]");
-    if (!beer) return;
-    const level = this.tapLevel();
-    beer.style.height = `${Math.min(100, level)}%`;
-    beer.style.borderTopWidth = level > 3 ? "6px" : "0";
-    if (this.tap && level >= 100) this.releaseTap();
+  /** Pas de redessin pendant qu'on tire une bière : il ferait sauter l'animation. On redessine au relâcher. */
+  render(options = {}) {
+    if (this.tap && this.rendered) {
+      this._renderPending = true;
+      return this;
+    }
+    return super.render(options);
   }
 
   /* ---- Tireuse ---- */
@@ -521,15 +535,31 @@ export class ServiceServerApp extends ServiceApp {
     const s = getService();
     const st = this.staff;
     if (!s?.running || !st || this.tap || isBusy(st)) return;
-    this.tap = { m: this.drink, start: performance.now() };
+    this.tap = { m: this.drink, start: performance.now(), frame: null };
     this.element.querySelector("[data-tap]")?.classList.add("holding");
+    this.#pour();
   }
+
+  /** Remplit la chope à chaque image de l'écran (fluide), jusqu'au relâcher ou au débordement. */
+  #pour = () => {
+    if (!this.tap) return;
+    const level = this.tapLevel();
+    const beer = this.element?.querySelector("[data-otium-beer]");
+    if (beer) {
+      beer.style.height = `${Math.min(100, level)}%`;
+      beer.classList.toggle("foam", level > 3);
+    }
+    if (level >= 100) return this.releaseTap();
+    this.tap.frame = requestAnimationFrame(this.#pour);
+  };
 
   releaseTap() {
     if (!this.tap) return;
     const level = this.tapLevel();
     const m = this.tap.m;
+    cancelAnimationFrame(this.tap.frame);
     this.tap = null;
+    this._renderPending = false;
     sendOp({ type: "tap", actorId: this.actorId, m, level: Math.round(level) });
     this.render();
   }
@@ -546,6 +576,7 @@ export class ServiceServerApp extends ServiceApp {
     if (kind === "tray" && zone === "pass") return sendOp({ type: "drop", actorId, uid: id });
     if (kind === "tray" && zone === "table") return sendOp({ type: "serve", actorId, table: target });
     if (kind === "stove" && (zone === "pass" || zone === "tray")) return sendOp({ type: "takeOut", actorId, slot: id, toTray: zone === "tray" });
+    if (kind === "stove" && zone === "table") return sendOp({ type: "takeOut", actorId, slot: id, table: target });
   }
 
   _onFirstRender(context, options) {

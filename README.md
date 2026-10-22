@@ -129,7 +129,7 @@ Pendant le service, le MJ peut :
 Ouvre l'outil **Service : prendre son poste**, choisis ton personnage, puis :
 
 - **Tireuse** : maintiens le bouton et relâche dans la zone verte. Une chope parfaite rapporte un meilleur pourboire ; trop longtemps et ça déborde.
-- **Cuisine** : trois feux. Un plat prêt doit être sorti vite, sinon il brûle.
+- **Cuisine** : trois feux. Un plat prêt doit être sorti vite, sinon il brûle. **Envoyer à** propose les tables qui attendent ce plat : le cuisinier le sort et le porte lui-même au client (ou le glisse du feu jusqu'à la table).
 - **Planche et cave** : pain, vin… Ton personnage est occupé pendant la préparation.
 - **Comptoir et plateau** : clique un plat pour le charger (trois places), puis **Servir** sur une table. Le plateau propose directement les tables qui attendent ce que tu portes, celles qui attendent depuis le plus longtemps en premier. Tout se fait aussi en glisser-déposer.
 - **Encaisser** : rends la monnaie juste. Trop peu, pas de pourboire ; trop, la taverne perd la différence.
@@ -169,9 +169,13 @@ Les postes sont des **Régions** de Foundry, invisibles aux joueurs, auxquelles 
 
 En jeu :
 
-- Dès que la scène a **au moins un poste de travail**, un serveur ne peut faire une action que si son jeton est dans un poste qui l'autorise. La vue Serveur montre où il se trouve, grise les postes hors de portée et indique où aller. Le MJ revérifie chaque action.
+- Dès que la scène a **au moins un poste de travail**, un serveur ne peut faire une action que si son jeton est dans un poste qui l'autorise. Seuls le comptoir et le plateau (prendre un plat, le porter à une table) sont accessibles depuis **n'importe quel** poste : le cuisinier peut servir ses propres plats. La vue Serveur montre où il se trouve, grise les postes hors de portée et indique où aller. Le MJ revérifie chaque action.
 - Amener son jeton dans un poste **fait prendre son poste** et ouvre la vue Serveur.
 - Poser son jeton sur une **table** pendant un service y installe le joueur et ouvre sa vue Client. Il change de table en déplaçant son jeton, et la libère en sortant s'il n'a rien commandé.
+
+### Voir les postes (MJ)
+
+Le MJ voit sur la scène chaque poste dessiné en couleur (cuisine, tireuse, planche et cave, caisse, comptoir, tables) avec une étiquette : nom de la zone, tâches, et pendant un service les personnages qui s'y trouvent. Les joueurs ne voient rien. Bouton **Afficher / Masquer les postes sur la scène** dans l'onglet Otium.
 
 ### L'encart des postes
 
@@ -194,6 +198,7 @@ Dans **Réglages du jeu → Configurer les modules → Otium** :
 | Réglage | Pour qui | Rôle |
 | --- | --- | --- |
 | *Encart des postes de service* | Chaque joueur | Coin de l'écran où s'affiche l'encart (en bas à droite par défaut), ou *Désactivé* |
+| *Postes de service visibles (MJ)* | MJ | Dessine les postes sur la scène (le bouton de l'onglet Otium change ce réglage) |
 | *Langue d'Otium* | Chaque joueur | Français, anglais, ou *Comme Foundry* (par défaut). Le bouton **FR / EN** en haut à droite de chaque fenêtre d'Otium change ce réglage en un clic, sans recharger |
 
 Les réglages d'une taverne (carte, prix, stock, effets en jeu, colonne Service) se font dans la taverne elle-même : onglet Otium, **Modifier**.

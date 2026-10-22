@@ -13,6 +13,7 @@ import { MODULE_ID, FLAG_TAVERN, t, esc, warn } from "./constants.js";
 import { getTaverns, sceneTavern, setSceneTavern } from "./store.js";
 import { openApps, openMenu, openTavernList, TavernConfig, languageButton, toggleLanguage } from "./apps.js";
 import { getService } from "./service.js";
+import { zonesVisible, toggleZones } from "./zone-overlay.js";
 import { GM_SERVICE_ACTIONS, gmServiceHtml, bindGMInputs, updateLiveIn, ensureLive, openServiceGM } from "./service-apps.js";
 
 export const TAB_NAME = "otium";
@@ -47,7 +48,8 @@ export function registerSidebarTab() {
             if (tavern) openMenu(tavern.id);
           },
           popout: () => openServiceGM(),
-          toggleLanguage: () => toggleLanguage()
+          toggleLanguage: () => toggleLanguage(),
+          toggleZones: () => toggleZones()
         }
       };
 
@@ -141,6 +143,9 @@ export function registerSidebarTab() {
               <button type="button" data-action="editTavern" ${tavern ? "" : "disabled"}><i class="fa-solid fa-pen"></i> ${t("List.Edit")}</button>
               <button type="button" data-action="openTaverns"><i class="fa-solid fa-store"></i> ${t("Sidebar.AllTaverns")}</button>
             </div>
+            <button type="button" class="otium-zones-toggle ${zonesVisible() ? "active" : ""}" data-action="toggleZones" aria-pressed="${zonesVisible()}">
+              <i class="fa-solid ${zonesVisible() ? "fa-eye" : "fa-eye-slash"}"></i> ${t(zonesVisible() ? "Sidebar.HideZones" : "Sidebar.ShowZones")}
+            </button>
           </section>
 
           <section class="otium-sidebar-section">

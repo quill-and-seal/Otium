@@ -159,7 +159,9 @@
         "Ready": "ready, take it out fast",
         "Burnt": "burnt",
         "TakeOut": "Take out {dish}",
-        "Trash": "Throw away"
+        "Trash": "Throw away",
+        "SendTo": "Send to",
+        "SendTip": "Take the dish out and carry it straight to this table"
       },
       "TapResult": {
         "Perfect": "Perfect pint!",
@@ -297,7 +299,9 @@
         "NotActiveGM": "Only the active GM (the first connected GM) can open a service.",
         "NotHere": "{name} must be in a \"{zone}\" station for that.",
         "NoSuchTable": "{table} doesn't exist in this service.",
-        "TableBusy": "{table} is occupied: it can't be removed."
+        "TableBusy": "{table} is occupied: it can't be removed.",
+        "NotInStation": "{name} must be in a service station for that.",
+        "NotWaiting": "{table} isn't waiting for this dish."
       },
       "Log": {
         "Opened": "Service opens at {tavern}.",
@@ -323,7 +327,8 @@
       "Zone": {
         "MoveTo": "Move your token into a \"{zone}\" station.",
         "Here": "Station: {zones}",
-        "Nowhere": "Your token isn't in any service station."
+        "Nowhere": "Your token isn't in any service station.",
+        "MoveToAny": "Move your token into a service station to pick up dishes."
       },
       "Tier": {
         "lightning": "Lightning",
@@ -369,7 +374,9 @@
       "TavernHint": "Pick the tavern open on this scene.",
       "LockedDuringService": "End the service to change tavern.",
       "AllTaverns": "All taverns",
-      "Popout": "Open in a window"
+      "Popout": "Open in a window",
+      "ShowZones": "Show stations on the scene",
+      "HideZones": "Hide stations on the scene"
     },
     "Settings": {
       "Card": {
@@ -387,6 +394,10 @@
         "auto": "Same as Foundry",
         "fr": "Français",
         "en": "English"
+      },
+      "ShowZones": {
+        "Name": "Visible service stations (GM)",
+        "Hint": "Draws each service station on the scene, for the GM only, with its name, tasks and the characters inside."
       }
     },
     "Card": {

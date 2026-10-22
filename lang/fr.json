@@ -159,7 +159,9 @@
         "Ready": "prêt, à sortir vite",
         "Burnt": "brûlé",
         "TakeOut": "Sortir {dish}",
-        "Trash": "Jeter"
+        "Trash": "Jeter",
+        "SendTo": "Envoyer à",
+        "SendTip": "Sortir le plat et le porter directement à cette table"
       },
       "TapResult": {
         "Perfect": "Chope parfaite !",
@@ -297,7 +299,9 @@
         "NotActiveGM": "Seul le MJ actif (le premier MJ connecté) peut ouvrir un service.",
         "NotHere": "{name} doit être dans un poste « {zone} » pour ça.",
         "NoSuchTable": "{table} n'existe pas dans ce service.",
-        "TableBusy": "{table} est occupée : on ne peut pas la retirer."
+        "TableBusy": "{table} est occupée : on ne peut pas la retirer.",
+        "NotInStation": "{name} doit être dans un poste de service pour ça.",
+        "NotWaiting": "{table} n'attend pas ce plat."
       },
       "Log": {
         "Opened": "Le service ouvre à {tavern}.",
@@ -323,7 +327,8 @@
       "Zone": {
         "MoveTo": "Placez votre jeton dans un poste « {zone} ».",
         "Here": "Poste : {zones}",
-        "Nowhere": "Votre jeton n'est dans aucun poste de service."
+        "Nowhere": "Votre jeton n'est dans aucun poste de service.",
+        "MoveToAny": "Placez votre jeton dans un poste de service pour prendre les plats."
       },
       "Tier": {
         "lightning": "Éclair",
@@ -369,7 +374,9 @@
       "TavernHint": "Choisir la taverne ouverte sur cette scène.",
       "LockedDuringService": "Terminez le service pour changer de taverne.",
       "AllTaverns": "Toutes les tavernes",
-      "Popout": "Ouvrir en fenêtre"
+      "Popout": "Ouvrir en fenêtre",
+      "ShowZones": "Afficher les postes sur la scène",
+      "HideZones": "Masquer les postes sur la scène"
     },
     "Settings": {
       "Card": {
@@ -387,6 +394,10 @@
         "auto": "Comme Foundry",
         "fr": "Français",
         "en": "English"
+      },
+      "ShowZones": {
+        "Name": "Postes de service visibles (MJ)",
+        "Hint": "Dessine sur la scène, pour le MJ seulement, chaque poste de service avec son nom, ses tâches et les personnages qui s'y trouvent."
       }
     },
     "Card": {
