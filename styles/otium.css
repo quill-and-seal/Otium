@@ -1287,3 +1287,18 @@
   flex: 1;
   text-align: right;
 }
+
+/* ---- Nom du joueur à côté de son personnage ---- */
+
+.otium .otium-player {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--otium-player, currentColor);
+  font-size: 0.75em;
+  font-weight: 600;
+  line-height: 1.4;
+  opacity: 0.9;
+  vertical-align: middle;
+}

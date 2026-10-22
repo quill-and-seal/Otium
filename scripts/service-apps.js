@@ -151,6 +151,23 @@ function timerHtml(ticket) {
     ${ticket.phase === "order" ? bar("tier", ticket.id) : ""}`;
 }
 
+/** Joueur (utilisateur Foundry) qui incarne ce personnage : son personnage assigné d'abord, sinon un propriétaire. */
+export function playerOf(actorId) {
+  if (!actorId) return null;
+  const users = game.users?.contents ?? [...(game.users ?? [])];
+  const players = users.filter((u) => !u.isGM);
+  const assigned = players.find((u) => u.character?.id === actorId);
+  if (assigned) return assigned;
+  const actor = game.actors.get(actorId);
+  return players.find((u) => actor?.testUserPermission?.(u, "OWNER")) ?? null;
+}
+
+/** « Thorin · Alice » : le personnage, puis le nom du joueur s'il y en a un. */
+function whoHtml(name, actorId) {
+  const user = playerOf(actorId);
+  return `${esc(name)}${user ? ` <span class="otium-player" style="--otium-player:${esc(user.color?.css ?? user.color ?? "")}">${esc(user.name)}</span>` : ""}`;
+}
+
 function ticketChips(s, ticket) {
   return ticket.items
     .map((it) => `<span class="otium-chip ${it.served ? "done" : ""} ${it.perfect ? "perfect" : ""}">${esc(menuItem(s, it.m)?.name)}</span>`)
@@ -280,7 +297,7 @@ export class ServiceServerApp extends ServiceApp {
     else status = `<span class="hint">${s.running ? L("Server.Free") : L("Server.Waiting")}</span>`;
     return `
       <div class="otium-status">
-        <strong>${esc(st.name)}</strong>
+        <strong>${whoHtml(st.name, st.id)}</strong>
         ${status}
         <span class="otium-clock" data-otium-clock>${clock(now)}</span>
         <button type="button" class="icon" data-action="leave" data-tooltip="${esc(L("Server.Leave"))}" ${busy ? "disabled" : ""}><i class="fa-solid fa-right-from-bracket"></i></button>
@@ -331,8 +348,8 @@ export class ServiceServerApp extends ServiceApp {
         else action = `<button type="button" class="otium-primary" data-action="cash" data-table="${tb.n}" ${disabled || ticket.cashier || !this.can("cash") ? "disabled" : ""}>${L("Server.Cash", { total: formatCp(ticketTotal(s, ticket)) })}</button>`;
         return `
           <article class="otium-table ${bill ? "bill" : ""} ${ticket.calling ? "calling" : ""}" ${bill ? "" : `data-drop="table:${tb.n}"`}>
-            <header><strong>${L("Table", { n: tb.n })}</strong><span class="hint">${bill ? L("Server.Bill") : ticket.kind === "player" ? L("Server.Player") : ""}</span></header>
-            <span class="otium-who" title="${esc(ticket.name)}">${ticket.calling ? '<i class="fa-solid fa-bell"></i> ' : ""}${esc(ticket.name)}</span>
+            <header><strong>${L("Table", { n: tb.n })}</strong><span class="hint">${bill ? L("Server.Bill") : ""}</span></header>
+            <span class="otium-who" title="${esc(ticket.name)}">${ticket.calling ? '<i class="fa-solid fa-bell"></i> ' : ""}${ticket.kind === "player" ? whoHtml(ticket.name, ticket.actorId) : esc(ticket.name)}</span>
             <div class="otium-chips">${ticketChips(s, ticket)}</div>
             ${timerHtml(ticket)}
             <div class="otium-table-actions">${action}</div>
@@ -754,14 +771,14 @@ export function gmServiceHtml() {
         }
         const served = ticket.items.filter((it) => it.served).length;
         const state = ticket.phase === "bill" ? L("GM.WaitingBill") : L("GM.ServedCount", { served, total: ticket.items.length });
-        return `<tr><td>${tb.n}</td><td>${ticket.calling ? '<i class="fa-solid fa-bell"></i> ' : ""}${esc(ticket.name)}</td><td>${state}</td>
+        return `<tr><td>${tb.n}</td><td>${ticket.calling ? '<i class="fa-solid fa-bell"></i> ' : ""}${ticket.kind === "player" ? whoHtml(ticket.name, ticket.actorId) : esc(ticket.name)}</td><td>${state}</td>
           <td>${timerHtml(ticket)}</td></tr>`;
       })
       .join("");
 
     const now = serviceNow();
     const staff = Object.values(s.staff)
-      .map((member) => `<tr><td>${esc(member.name)}</td>
+      .map((member) => `<tr><td>${whoHtml(member.name, member.id)}</td>
         <td>${isBusy(member, now) ? esc(L(`Busy.${member.busy.key}`, member.busy.data)) : `<span class="hint">${L("Server.Free")}</span>`}</td>
         <td>${member.tray.map((d) => esc(menuItem(s, d.m)?.name)).join(", ") || `<span class="hint">${L("GM.EmptyTray")}</span>`}</td></tr>`)
       .join("");

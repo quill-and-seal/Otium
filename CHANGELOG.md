@@ -6,6 +6,7 @@ Bouton FR / EN et corrections des réglages d'une taverne.
 
 - Bouton **FR / EN** en haut à droite de chaque fenêtre d'Otium (et dans l'onglet MJ) : Otium passe en français ou en anglais sans recharger, quelle que soit la langue de Foundry. Le choix est propre à chaque joueur (réglage *Langue d'Otium*, « Comme Foundry » par défaut)
 
+- Service : le **nom du joueur** s'affiche à côté de son personnage (tables des clients joueurs, poste de serveur, personnel dans la vue MJ), dans la couleur du joueur, à la place de la simple mention « joueur »
 - Les fenêtres d'Otium ne dépassent plus de l'écran : leur contenu **défile** (la carte d'une taverne était impossible à faire défiler)
 - Les **noms des articles** ne s'effacent plus en modifiant la carte : le formulaire est lu champ par champ, et un champ absent garde sa valeur
 - Mise en page de la carte : prix et monnaie alignés sur la ligne, description sur toute la largeur, boutons de ligne côte à côte
