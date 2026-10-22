@@ -1,3 +1,5 @@
+import { ownText } from "./constants.js";
+
 /**
  * Monnaie dnd5e : conversions, paiement avec rendu de monnaie, affichage.
  * Tout est calculé en pièces de cuivre (pc) pour éviter les arrondis.
@@ -80,6 +82,8 @@ export function cashGiven(due) {
 
 /** Abréviation localisée d'une pièce (po, pa, pc… en français). */
 export function abbr(denom) {
+  const own = ownText(`Currency.${denom}`);
+  if (own) return own;
   const key = globalThis.CONFIG?.DND5E?.currencies?.[denom]?.abbreviation;
   return key ? game.i18n.localize(key) : denom;
 }

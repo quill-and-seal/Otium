@@ -21,6 +21,8 @@ https://github.com/quill-and-seal/Otium/releases/latest/download/module.json
 
 Active ensuite le module dans ton monde **dnd5e**.
 
+Otium parle **français** et **anglais**. Le bouton **FR / EN**, en haut à droite de chaque fenêtre, change la langue du module pour toi seul, sans toucher à celle de Foundry. Les noms des tavernes et des articles restent ceux que le MJ a saisis.
+
 ## Démarrage rapide
 
 1. **MJ** : ouvre l'onglet **Otium** de la barre latérale, puis **Toutes les tavernes**.
@@ -186,6 +188,7 @@ Dans **Réglages du jeu → Configurer les modules → Otium** :
 | Réglage | Pour qui | Rôle |
 | --- | --- | --- |
 | *Encart des postes de service* | Chaque joueur | Coin de l'écran où s'affiche l'encart (en bas à droite par défaut), ou *Désactivé* |
+| *Langue d'Otium* | Chaque joueur | Français, anglais, ou *Comme Foundry* (par défaut). Le bouton **FR / EN** en haut à droite de chaque fenêtre d'Otium change ce réglage en un clic, sans recharger |
 
 Les réglages d'une taverne (carte, prix, stock, effets en jeu, colonne Service) se font dans la taverne elle-même : onglet Otium, **Modifier**.
 

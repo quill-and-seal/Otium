@@ -688,4 +688,7 @@ export async function moveToken(actor, region) {
   bench.emit("actors");
 }
 
+// Pas de serveur de fichiers dans le banc : les langues sont déjà intégrées
+globalThis.fetch = async () => ({ ok: false });
+
 setLanguage("fr");

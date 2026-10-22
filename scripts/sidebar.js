@@ -11,7 +11,7 @@
 
 import { MODULE_ID, FLAG_TAVERN, t, esc, warn } from "./constants.js";
 import { getTaverns, sceneTavern, setSceneTavern } from "./store.js";
-import { openApps, openMenu, openTavernList, TavernConfig } from "./apps.js";
+import { openApps, openMenu, openTavernList, TavernConfig, languageButton, toggleLanguage } from "./apps.js";
 import { getService } from "./service.js";
 import { GM_SERVICE_ACTIONS, gmServiceHtml, bindGMInputs, updateLiveIn, ensureLive, openServiceGM } from "./service-apps.js";
 
@@ -46,7 +46,8 @@ export function registerSidebarTab() {
             const tavern = sceneTavern();
             if (tavern) openMenu(tavern.id);
           },
-          popout: () => openServiceGM()
+          popout: () => openServiceGM(),
+          toggleLanguage: () => toggleLanguage()
         }
       };
 
@@ -126,6 +127,7 @@ export function registerSidebarTab() {
           <header class="otium-sidebar-head">
             <h2><i class="fa-solid fa-beer-mug-empty"></i> Otium</h2>
             <span class="hint">${esc(scene?.name ?? t("Sidebar.NoScene"))}</span>
+            ${languageButton()}
           </header>
 
           <section class="otium-sidebar-section">

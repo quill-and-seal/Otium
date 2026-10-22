@@ -8,12 +8,12 @@
  * le MJ pilote le service, et un joueur attablé passe commande aux serveurs.
  */
 
-import { MODULE_ID, SOCKET, SETTING_TAVERNS, FLAG_TAVERN, log } from "./constants.js";
+import { MODULE_ID, SOCKET, SETTING_TAVERNS, FLAG_TAVERN, LANGUAGES, loadDictionaries, log } from "./constants.js";
 import { getTaverns, getTavern, saveTavern, deleteTavern, sceneTavern, setSceneTavern, consumeStock, newTavern, newItem } from "./store.js";
 import { TEMPLATES } from "./presets.js";
 import { placeOrder } from "./order.js";
 import { addAlcohol, sober, drunkLevel } from "./effects.js";
-import { MenuApp, refreshApps, openApps, openMenu, openSceneMenu, openTavernList } from "./apps.js";
+import { MenuApp, refreshApps, openApps, openMenu, openSceneMenu, openTavernList, rerenderAll } from "./apps.js";
 import { getService, getSummary, openService, sendOp, handleServiceSocket, requestSync, payTips } from "./service.js";
 import { ServiceClientApp, openServiceServer, openServiceGM, openServiceClient } from "./service-apps.js";
 import { registerStationBehavior, onZoneEvent, STATION_BEHAVIOR } from "./zones.js";
@@ -34,6 +34,23 @@ Hooks.once("init", () => {
     default: {},
     onChange: () => refreshApps()
   });
+
+  // Langue d'Otium, indépendante de celle de Foundry (bouton FR / EN des fenêtres)
+  game.settings.register(MODULE_ID, "language", {
+    name: "OTIUM.Settings.Language.Name",
+    hint: "OTIUM.Settings.Language.Hint",
+    scope: "client",
+    config: true,
+    type: String,
+    choices: Object.fromEntries(["auto", ...LANGUAGES].map((l) => [l, `OTIUM.Settings.Language.${l}`])),
+    default: "auto",
+    onChange: () => {
+      rerenderAll();
+      refreshZoneCard();
+    }
+  });
+  // Les deux langues sont chargées dès le départ, pour basculer sans recharger
+  loadDictionaries().then(() => rerenderAll());
 
   // Encart dans un coin de l'écran tant que son jeton est dans un poste ou sur une table
   game.settings.register(MODULE_ID, "zoneCard", {

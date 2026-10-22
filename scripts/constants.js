@@ -51,8 +51,63 @@ export function warn(...args) {
   console.warn("Otium |", ...args);
 }
 
-/** Traduction raccourcie. */
+/* -------------------------------------------- */
+/*  Langue d'Otium                              */
+/*  Le module peut s'afficher en français ou en */
+/*  anglais, quelle que soit la langue de       */
+/*  Foundry (réglage client « language »).      */
+/* -------------------------------------------- */
+
+/** Langues proposées par le bouton FR / EN. */
+export const LANGUAGES = ["fr", "en"];
+
+const dictionaries = {};
+
+/** Enregistre le dictionnaire d'une langue (contenu d'un fichier lang/xx.json). */
+export function setDictionary(lang, json) {
+  dictionaries[lang] = json;
+}
+
+/** Charge les dictionnaires depuis les fichiers du module (dans Foundry). */
+export async function loadDictionaries() {
+  await Promise.all(
+    LANGUAGES.filter((lang) => !dictionaries[lang]).map(async (lang) => {
+      try {
+        const response = await fetch(`modules/${MODULE_ID}/lang/${lang}.json`);
+        if (response.ok) dictionaries[lang] = await response.json();
+      } catch (err) {
+        warn(`Langue ${lang} indisponible`, err);
+      }
+    })
+  );
+}
+
+/** Langue affichée par Otium : celle choisie, sinon celle de Foundry. */
+export function otiumLang() {
+  let chosen = "auto";
+  try {
+    chosen = game.settings.get(MODULE_ID, "language");
+  } catch {
+    /* réglage pas encore enregistré */
+  }
+  if (LANGUAGES.includes(chosen)) return chosen;
+  return String(game.i18n?.lang ?? "en").startsWith("fr") ? "fr" : "en";
+}
+
+function lookup(dict, path) {
+  return path.split(".").reduce((o, k) => (o && typeof o === "object" ? o[k] : undefined), dict);
+}
+
+/** Texte d'Otium dans sa langue, ou undefined s'il n'existe pas. */
+export function ownText(key) {
+  const value = lookup(dictionaries[otiumLang()], `OTIUM.${key}`);
+  return typeof value === "string" ? value : undefined;
+}
+
+/** Traduction raccourcie, dans la langue choisie pour Otium. */
 export function t(key, data) {
+  const own = ownText(key);
+  if (own !== undefined) return data ? own.replace(/\{(\w+)\}/g, (m, k) => (k in data ? data[k] : m)) : own;
   const full = `OTIUM.${key}`;
   return data ? game.i18n.format(full, data) : game.i18n.localize(full);
 }

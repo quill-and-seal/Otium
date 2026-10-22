@@ -375,6 +375,13 @@
         "top-right": "En haut à droite",
         "bottom-left": "En bas à gauche",
         "bottom-right": "En bas à droite"
+      },
+      "Language": {
+        "Name": "Langue d'Otium",
+        "Hint": "Langue des fenêtres d'Otium, indépendamment de celle de Foundry. Le bouton FR / EN en haut à droite des fenêtres change ce réglage.",
+        "auto": "Comme Foundry",
+        "fr": "Français",
+        "en": "English"
       }
     },
     "Card": {
@@ -398,6 +405,17 @@
       "OpenMenu": "Voir la carte",
       "Hide": "Masquer jusqu'au prochain lieu",
       "Follow": "Suivre ma commande"
+    },
+    "Currency": {
+      "pp": "pp",
+      "gp": "po",
+      "ep": "pe",
+      "sp": "pa",
+      "cp": "pc"
+    },
+    "Lang": {
+      "Toggle": "Afficher Otium en anglais",
+      "Short": "FR"
     }
   },
   "TYPES": {

@@ -5,7 +5,7 @@
  * - TavernConfig : modifier une taverne et sa carte, côté MJ
  */
 
-import { MODULE_ID, FLAG_TAVERN, CATEGORIES, RESTS, STATIONS, DRUNK, t, esc } from "./constants.js";
+import { MODULE_ID, FLAG_TAVERN, CATEGORIES, RESTS, STATIONS, DRUNK, LANGUAGES, otiumLang, t, esc } from "./constants.js";
 import { getTaverns, getTavern, saveTavern, deleteTavern, sceneTavern, setSceneTavern, newItem } from "./store.js";
 import { TEMPLATES, TEMPLATE_IDS } from "./presets.js";
 import { DENOMS, priceToCp, walletToCp, formatCp, formatWallet, abbr } from "./currency.js";
@@ -28,8 +28,39 @@ export function refreshApps() {
   }
 }
 
+/* -------------------------------------------- */
+/*  Bouton FR / EN                              */
+/* -------------------------------------------- */
+
+/** Passe Otium à l'autre langue (réglage client, toutes les fenêtres suivent). */
+export async function toggleLanguage() {
+  const current = otiumLang();
+  const next = LANGUAGES[(LANGUAGES.indexOf(current) + 1) % LANGUAGES.length];
+  await game.settings.set(MODULE_ID, "language", next);
+}
+
+/** Bouton FR / EN (affiche la langue actuelle ; un clic passe à l'autre). */
+export function languageButton(extraClass = "") {
+  const lang = otiumLang();
+  return `<button type="button" class="otium-lang ${extraClass}" data-action="toggleLanguage" data-tooltip="${esc(t("Lang.Toggle"))}" aria-label="${esc(t("Lang.Toggle"))}">${lang.toUpperCase()}</button>`;
+}
+
+/** Redessine toutes les fenêtres d'Otium (changement de langue). */
+export function rerenderAll() {
+  for (const app of openApps) {
+    app.render();
+    app._refreshLanguageButton?.();
+  }
+}
+
 /** Classe de base : rendu par chaîne HTML et suivi des fenêtres ouvertes. */
 export class OtiumApp extends ApplicationV2 {
+  static DEFAULT_OPTIONS = {
+    actions: {
+      toggleLanguage: () => toggleLanguage()
+    }
+  };
+
   _html() {
     return "";
   }
@@ -48,6 +79,32 @@ export class OtiumApp extends ApplicationV2 {
   _onFirstRender(context, options) {
     super._onFirstRender?.(context, options);
     openApps.add(this);
+    this._addLanguageButton();
+  }
+
+  /** Bouton FR / EN dans l'en-tête de la fenêtre, à gauche des boutons de Foundry. */
+  _addLanguageButton() {
+    const header = this.window?.header ?? this.element?.querySelector(".window-header");
+    if (!header || header.querySelector(".otium-lang")) return;
+    const holder = document.createElement("template");
+    holder.innerHTML = languageButton("header-control");
+    const button = holder.content.firstElementChild;
+    // Avant le menu « ⋮ » et la croix de fermeture
+    const anchor = header.querySelector('[data-action="toggleControls"], [data-action="close"], [data-bench-close]');
+    if (anchor) anchor.before(button);
+    else header.append(button);
+  }
+
+  /** Le titre et le bouton de l'en-tête changent avec la langue. */
+  _refreshLanguageButton() {
+    const button = this.window?.header?.querySelector(".otium-lang") ?? this.element?.querySelector(".window-header .otium-lang");
+    if (button) {
+      button.textContent = otiumLang().toUpperCase();
+      button.dataset.tooltip = t("Lang.Toggle");
+      button.setAttribute("aria-label", t("Lang.Toggle"));
+    }
+    const title = this.window?.title ?? this.element?.querySelector(".window-title");
+    if (title && this.title) title.textContent = this.title;
   }
 
   _onClose(options) {

@@ -5,7 +5,13 @@
 
 import { bench, setLanguage, users, actors, scene, addZone, moveToken, tokenOf } from "./foundry-mock.js";
 import "../scripts/main.js";
-import { MODULE_ID } from "../scripts/constants.js";
+import { MODULE_ID, setDictionary } from "../scripts/constants.js";
+import frLang from "../lang/fr.json";
+import enLang from "../lang/en.json";
+
+// Dans Foundry, Otium charge ses fichiers de langue ; ici ils sont intégrés au banc
+setDictionary("fr", frLang);
+setDictionary("en", enLang);
 import { TEMPLATES } from "../scripts/presets.js";
 import { openApps } from "../scripts/apps.js";
 import { formatWallet } from "../scripts/currency.js";
