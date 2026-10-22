@@ -46,6 +46,23 @@ Pour que les joueurs tiennent la taverne à la place, voir [Mode Service](#mode-
 | *Taverne de la scène* | Choisir la taverne ouverte sur la scène (ou la fermer), voir sa carte, la modifier, ouvrir la liste de toutes les tavernes |
 | *Service* | Ouvrir, lancer et piloter un service, suivre la salle et le personnel, voir le bilan et verser les pourboires. *Ouvrir en fenêtre* l'affiche en grand |
 
+## L'onglet du MJ
+
+L'onglet **Otium** de la barre latérale (icône de chope, juste avant les réglages) n'est visible que du MJ. Il réunit ce qu'il faut pendant une séance, sans ouvrir de fenêtre.
+
+**Taverne de la scène**
+
+- La **liste** choisit la taverne ouverte sur la scène active ; *— Taverne fermée —* la ferme. Pendant un service, la liste est verrouillée.
+- **Voir la carte** l'affiche comme un joueur, **Modifier** ouvre ses réglages, **Toutes les tavernes** ouvre la liste complète (créer, modifier, supprimer).
+
+**Service**
+
+- Sans service : choisis le nombre de tables, puis **Ouvrir le service**. Après un service, le **bilan** s'affiche ici, avec **Verser les pourboires**.
+- Pendant un service : lancer ou mettre en pause, vitesse ×2, affluence, temps visé, événements, puis la salle avec les chronos, le personnel et le journal, mis à jour en direct.
+- **Ouvrir en fenêtre** affiche le même pilotage en grand, pratique sur un deuxième écran.
+
+Si l'onglet ne peut pas être ajouté (version de Foundry différente), les boutons *Service (MJ)* et *Gérer les tavernes* reviennent dans le groupe Jetons.
+
 ## Mode Clientèle : les joueurs commandent seuls
 
 ### Préparer une taverne (MJ)
@@ -146,8 +163,31 @@ En jeu :
 
 - Dès que la scène a **au moins un poste de travail**, un serveur ne peut faire une action que si son jeton est dans un poste qui l'autorise. La vue Serveur montre où il se trouve, grise les postes hors de portée et indique où aller. Le MJ revérifie chaque action.
 - Amener son jeton dans un poste **fait prendre son poste** et ouvre la vue Serveur.
-- Tant que le jeton d'un joueur est dans un poste ou sur une table, un **encart** s'affiche dans un coin de son écran : nom du lieu (le nom de la Région), ce qu'on peut y faire, et l'état du service (plats prêts, plateau, tables à servir ; à table, l'avancement et le chrono de sa commande). **Un clic** ouvre son poste ou la commande à table. Chaque joueur choisit le coin, ou le désactive, dans les réglages du module (*Encart des postes de service*).
 - Poser son jeton sur une **table** pendant un service y installe le joueur et ouvre sa vue Client. Il change de table en déplaçant son jeton, et la libère en sortant s'il n'a rien commandé.
+
+### L'encart des postes
+
+Tant que le jeton d'un joueur est dans un poste ou sur une table, une case s'affiche dans un coin de **son** écran (les autres joueurs ne la voient pas) :
+
+| Où | Ce que montre l'encart | Au clic |
+| --- | --- | --- |
+| Poste de travail | Nom du lieu, ce qu'on peut y faire, puis pendant un service : plats prêts au comptoir, plateau, tables à servir, additions | Ouvre le poste de serveur |
+| Table | Nom du lieu, puis pendant un service : « à vous de commander », ou l'avancement de la commande avec son chrono et son palier | Ouvre la commande à table |
+| Sans service | « Pas de service en cours » | À une table : ouvre la carte de la taverne |
+
+L'encart disparaît quand le jeton sort de la zone. Le **×** le masque jusqu'au prochain lieu.
+
+**Astuce MJ** : donne aux Régions des noms parlants (« Comptoir », « Cuisine », « Coin du feu ») ; c'est ce nom qui s'affiche en titre de l'encart.
+
+## Réglages du module
+
+Dans **Réglages du jeu → Configurer les modules → Otium** :
+
+| Réglage | Pour qui | Rôle |
+| --- | --- | --- |
+| *Encart des postes de service* | Chaque joueur | Coin de l'écran où s'affiche l'encart (en bas à droite par défaut), ou *Désactivé* |
+
+Les réglages d'une taverne (carte, prix, stock, effets en jeu, colonne Service) se font dans la taverne elle-même : onglet Otium, **Modifier**.
 
 ## Bon à savoir
 
@@ -158,7 +198,7 @@ En jeu :
 
 ## Banc d'essai
 
-`docs/preview.html` fait tourner le vrai code du module dans un faux Foundry, sans rien installer : on joue le MJ ou un joueur, on commande, on lance un service, on déplace les jetons entre les postes. Pour le régénérer : `npm install && npm run build:preview`.
+`docs/preview.html` fait tourner le vrai code du module dans un faux Foundry, sans rien installer : on joue le MJ ou un joueur, on commande, on lance un service depuis l'onglet MJ (colonne de droite), on déplace les jetons entre les postes et on voit l'encart. Pour le régénérer : `npm install && npm run build:preview`.
 
 ## API
 
@@ -175,6 +215,7 @@ En jeu :
 | `drunkLevel(actor)`, `addAlcohol(actor, n)`, `sober(actor)` | Ivresse |
 | `service.get()`, `service.open({ tables })`, `service.send(op)` | Mode Service |
 | `service.openGM()`, `service.openServer(actorId?)`, `service.openClient(actorId?)` | Fenêtres du service |
+| `openSidebar()` | Affiche l'onglet Otium de la barre latérale (MJ) |
 
 Hook : `otium.orderPlaced` reçoit `{ actor, tavern, lines, total }` (total en pièces de cuivre).
 
