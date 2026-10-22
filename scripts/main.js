@@ -18,7 +18,7 @@ import { getService, getSummary, openService, sendOp, handleServiceSocket, reque
 import { ServiceClientApp, openServiceServer, openServiceGM, openServiceClient } from "./service-apps.js";
 import { registerStationBehavior, onZoneEvent, STATION_BEHAVIOR } from "./zones.js";
 import { registerSidebarTab, hasSidebarTab, TAB_NAME } from "./sidebar.js";
-import { showZoneBanner } from "./banner.js";
+import { zoneEntered, zoneLeft, refreshZoneCard, CORNERS } from "./banner.js";
 
 /* -------------------------------------------- */
 /*  Initialisation                              */
@@ -35,14 +35,16 @@ Hooks.once("init", () => {
     onChange: () => refreshApps()
   });
 
-  // Bandeau en haut de l'écran quand son jeton entre dans un poste ou sur une table
-  game.settings.register(MODULE_ID, "zoneBanner", {
-    name: "OTIUM.Settings.Banner.Name",
-    hint: "OTIUM.Settings.Banner.Hint",
+  // Encart dans un coin de l'écran tant que son jeton est dans un poste ou sur une table
+  game.settings.register(MODULE_ID, "zoneCard", {
+    name: "OTIUM.Settings.Card.Name",
+    hint: "OTIUM.Settings.Card.Hint",
     scope: "client",
     config: true,
-    type: Boolean,
-    default: true
+    type: String,
+    choices: Object.fromEntries(CORNERS.map((c) => [c, `OTIUM.Settings.Card.${c}`])),
+    default: "bottom-right",
+    onChange: () => refreshZoneCard()
   });
 
   // Comportement de Région « Poste de service » (comptoir, cuisine, tables)
@@ -185,15 +187,10 @@ onZoneEvent(
     const player = !!actor?.isOwner && !game.user.isGM;
     const sameScene = !s?.sceneId || token?.parent?.id === s.sceneId;
 
-    // Bandeau : pour le joueur du jeton (et le MJ s'il le déplace lui-même)
+    // Encart dans un coin : pour le joueur du jeton (et le MJ s'il le déplace lui-même)
     if (actor && (player || mover)) {
       const region = zone.parent?.parent ?? event.region;
-      showZoneBanner(zone, {
-        place: region?.name,
-        actor,
-        service: !!s && sameScene,
-        staff: !!s?.staff?.[actor.id]
-      });
+      zoneEntered(zone, { regionId: region?.id, place: region?.name, actor });
     }
 
     if (!actor || !s || !sameScene) return refreshServiceApps();
@@ -210,6 +207,8 @@ onZoneEvent(
   // Sortie d'une table sans commande en cours : la table se libère
   async (zone, event) => {
     const actor = event.data?.token?.actor;
+    const region = zone.parent?.parent ?? event.region;
+    if (actor?.isOwner || event.user?.isSelf) zoneLeft({ regionId: region?.id, actor });
     if (actor && zone.mode === "table" && event.user?.isSelf && getService()) await sendOp({ type: "standUp", actorId: actor.id });
     refreshServiceApps();
   }

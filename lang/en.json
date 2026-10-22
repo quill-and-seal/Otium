@@ -366,19 +366,38 @@
       "AllTaverns": "All taverns",
       "Popout": "Open in a window"
     },
-    "Banner": {
+    "Settings": {
+      "Card": {
+        "Name": "Service station card",
+        "Hint": "A box in a corner of the screen while your token is in a station (counter, kitchen…) or at a table: the place, what can be done there, the state of the service. Click it to open the right view.",
+        "off": "Off",
+        "top-left": "Top left",
+        "top-right": "Top right",
+        "bottom-left": "Bottom left",
+        "bottom-right": "Bottom right"
+      }
+    },
+    "Card": {
       "Station": "Service station",
       "Nothing": "Nothing to do here",
       "NoService": "No service running",
       "OnDuty": "{name} is at their post",
-      "Seated": "{name} sits down",
-      "StaffAtTable": "{name} is on duty: no sitting down"
-    },
-    "Settings": {
-      "Banner": {
-        "Name": "Service station banner",
-        "Hint": "Shows a banner at the top of the screen when your token enters a station (counter, kitchen…) or a table."
-      }
+      "NotOnDuty": "Not at their post yet",
+      "Paused": "paused",
+      "Ready": "ready at the counter",
+      "Tray": "on the tray",
+      "Waiting": "tables to serve",
+      "Bills": "bills",
+      "Seated": "{name} is seated: time to order",
+      "StaffAtTable": "{name} is on duty: no sitting down",
+      "TableTaken": "This table is already taken",
+      "Served": "Order: {served}/{total} served",
+      "Bill": "Everything is served: a waiter is coming to collect",
+      "OpenServer": "Open my post",
+      "OpenClient": "Order at the table",
+      "OpenMenu": "View the menu",
+      "Hide": "Hide until the next place",
+      "Follow": "Follow my order"
     }
   },
   "TYPES": {

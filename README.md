@@ -146,7 +146,7 @@ En jeu :
 
 - Dès que la scène a **au moins un poste de travail**, un serveur ne peut faire une action que si son jeton est dans un poste qui l'autorise. La vue Serveur montre où il se trouve, grise les postes hors de portée et indique où aller. Le MJ revérifie chaque action.
 - Amener son jeton dans un poste **fait prendre son poste** et ouvre la vue Serveur.
-- Un **bandeau** apparaît en haut de l'écran du joueur à chaque entrée dans un poste ou sur une table : nom du lieu (le nom de la Région), ce qu'on peut y faire, et si un service est en cours. Chaque joueur peut le couper dans les réglages du module (*Bandeau des postes de service*).
+- Tant que le jeton d'un joueur est dans un poste ou sur une table, un **encart** s'affiche dans un coin de son écran : nom du lieu (le nom de la Région), ce qu'on peut y faire, et l'état du service (plats prêts, plateau, tables à servir ; à table, l'avancement et le chrono de sa commande). **Un clic** ouvre son poste ou la commande à table. Chaque joueur choisit le coin, ou le désactive, dans les réglages du module (*Encart des postes de service*).
 - Poser son jeton sur une **table** pendant un service y installe le joueur et ouvre sa vue Client. Il change de table en déplaçant son jeton, et la libère en sortant s'il n'a rien commandé.
 
 ## Bon à savoir

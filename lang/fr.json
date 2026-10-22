@@ -366,19 +366,38 @@
       "AllTaverns": "Toutes les tavernes",
       "Popout": "Ouvrir en fenêtre"
     },
-    "Banner": {
+    "Settings": {
+      "Card": {
+        "Name": "Encart des postes de service",
+        "Hint": "Une case dans un coin de l'écran tant que votre jeton est dans un poste (comptoir, cuisine…) ou sur une table : le lieu, ce qu'on peut y faire, l'état du service. Un clic ouvre la bonne vue.",
+        "off": "Désactivé",
+        "top-left": "En haut à gauche",
+        "top-right": "En haut à droite",
+        "bottom-left": "En bas à gauche",
+        "bottom-right": "En bas à droite"
+      }
+    },
+    "Card": {
       "Station": "Poste de service",
       "Nothing": "Rien à faire ici",
       "NoService": "Pas de service en cours",
       "OnDuty": "{name} est à son poste",
-      "Seated": "{name} s'installe",
-      "StaffAtTable": "{name} est de service : on ne s'attable pas"
-    },
-    "Settings": {
-      "Banner": {
-        "Name": "Bandeau des postes de service",
-        "Hint": "Affiche un bandeau en haut de l'écran quand votre jeton entre dans un poste (comptoir, cuisine…) ou sur une table."
-      }
+      "NotOnDuty": "Pas encore à son poste",
+      "Paused": "en pause",
+      "Ready": "prêts au comptoir",
+      "Tray": "sur le plateau",
+      "Waiting": "tables à servir",
+      "Bills": "additions",
+      "Seated": "{name} est à table : à vous de commander",
+      "StaffAtTable": "{name} est de service : on ne s'attable pas",
+      "TableTaken": "Cette table est déjà occupée",
+      "Served": "Commande : {served}/{total} servis",
+      "Bill": "Tout est servi : un serveur vient encaisser",
+      "OpenServer": "Ouvrir mon poste",
+      "OpenClient": "Commander à table",
+      "OpenMenu": "Voir la carte",
+      "Hide": "Masquer jusqu'au prochain lieu",
+      "Follow": "Suivre ma commande"
     }
   },
   "TYPES": {
