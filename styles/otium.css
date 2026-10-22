@@ -1049,3 +1049,88 @@
 .otium-sidebar .otium-footer {
   flex-wrap: wrap;
 }
+
+/* ============================================ */
+/*  Bandeau des postes de service               */
+/* ============================================ */
+
+#otium-banner {
+  --otium-accent: #c8923a;
+  position: fixed;
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: min(360px, 90vw);
+  max-width: 90vw;
+  padding: 0.55rem 1.4rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(200, 146, 58, 0.6);
+  border-top: 3px solid var(--otium-accent);
+  background: rgba(20, 16, 12, 0.92);
+  color: #f3ead7;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  cursor: pointer;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -16px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#otium-banner.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+#otium-banner.is-table {
+  border-top-color: #6fae7c;
+}
+
+#otium-banner.is-closed {
+  border-top-color: rgba(243, 234, 215, 0.4);
+}
+
+#otium-banner .otium-banner-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+#otium-banner .otium-banner-title i {
+  color: var(--otium-accent);
+}
+
+#otium-banner.is-table .otium-banner-title i {
+  color: #6fae7c;
+}
+
+#otium-banner .otium-banner-detail {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+#otium-banner .otium-banner-detail i {
+  opacity: 0.8;
+  margin-right: 0.2rem;
+}
+
+#otium-banner .otium-banner-status {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #otium-banner {
+    transition: none;
+  }
+}

@@ -2,11 +2,12 @@
 
 ## 0.1.4
 
-L'onglet du MJ.
+L'onglet du MJ et le bandeau des postes.
 
 - Nouvel onglet **Otium** dans la barre latérale, réservé au MJ (icône de chope, juste avant les réglages)
 - **Taverne de la scène** : choisir la taverne ouverte (ou la fermer) dans une liste, voir sa carte, la modifier, ouvrir la liste de toutes les tavernes ; le choix est verrouillé pendant un service
 - **Service** : tout le pilotage directement dans l'onglet (ouvrir, lancer, pause, vitesse, affluence, temps visé, événements, salle avec les chronos, personnel, journal, bilan et pourboires), et un bouton pour l'ouvrir en fenêtre
+- **Bandeau des postes** : quand un joueur amène son jeton dans un poste ou sur une table, un bandeau apparaît en haut de l'écran avec le nom du lieu, ce qu'on peut y faire et l'état du service. Seul le joueur du jeton le voit ; il se désactive dans les réglages du module (réglage par joueur)
 - Groupe Jetons allégé côté MJ : la chope et un bouton qui affiche l'onglet Otium remplacent « Service (MJ) » et « Gérer les tavernes ». Sans onglet disponible, les anciens boutons reviennent
 
 ## 0.1.3

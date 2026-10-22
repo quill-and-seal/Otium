@@ -365,6 +365,20 @@
       "LockedDuringService": "Terminez le service pour changer de taverne.",
       "AllTaverns": "Toutes les tavernes",
       "Popout": "Ouvrir en fenêtre"
+    },
+    "Banner": {
+      "Station": "Poste de service",
+      "Nothing": "Rien à faire ici",
+      "NoService": "Pas de service en cours",
+      "OnDuty": "{name} est à son poste",
+      "Seated": "{name} s'installe",
+      "StaffAtTable": "{name} est de service : on ne s'attable pas"
+    },
+    "Settings": {
+      "Banner": {
+        "Name": "Bandeau des postes de service",
+        "Hint": "Affiche un bandeau en haut de l'écran quand votre jeton entre dans un poste (comptoir, cuisine…) ou sur une table."
+      }
     }
   },
   "TYPES": {

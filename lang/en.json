@@ -365,6 +365,20 @@
       "LockedDuringService": "End the service to change tavern.",
       "AllTaverns": "All taverns",
       "Popout": "Open in a window"
+    },
+    "Banner": {
+      "Station": "Service station",
+      "Nothing": "Nothing to do here",
+      "NoService": "No service running",
+      "OnDuty": "{name} is at their post",
+      "Seated": "{name} sits down",
+      "StaffAtTable": "{name} is on duty: no sitting down"
+    },
+    "Settings": {
+      "Banner": {
+        "Name": "Service station banner",
+        "Hint": "Shows a banner at the top of the screen when your token enters a station (counter, kitchen…) or a table."
+      }
     }
   },
   "TYPES": {

@@ -18,6 +18,7 @@ import { getService, getSummary, openService, sendOp, handleServiceSocket, reque
 import { ServiceClientApp, openServiceServer, openServiceGM, openServiceClient } from "./service-apps.js";
 import { registerStationBehavior, onZoneEvent, STATION_BEHAVIOR } from "./zones.js";
 import { registerSidebarTab, hasSidebarTab, TAB_NAME } from "./sidebar.js";
+import { showZoneBanner } from "./banner.js";
 
 /* -------------------------------------------- */
 /*  Initialisation                              */
@@ -32,6 +33,16 @@ Hooks.once("init", () => {
     type: Object,
     default: {},
     onChange: () => refreshApps()
+  });
+
+  // Bandeau en haut de l'écran quand son jeton entre dans un poste ou sur une table
+  game.settings.register(MODULE_ID, "zoneBanner", {
+    name: "OTIUM.Settings.Banner.Name",
+    hint: "OTIUM.Settings.Banner.Hint",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: true
   });
 
   // Comportement de Région « Poste de service » (comptoir, cuisine, tables)
@@ -170,9 +181,22 @@ onZoneEvent(
     const token = event.data?.token;
     const actor = token?.actor;
     const s = getService();
-    if (!actor || !s || (s.sceneId && token.parent?.id !== s.sceneId)) return refreshServiceApps();
     const mover = !!event.user?.isSelf;
-    const player = actor.isOwner && !game.user.isGM;
+    const player = !!actor?.isOwner && !game.user.isGM;
+    const sameScene = !s?.sceneId || token?.parent?.id === s.sceneId;
+
+    // Bandeau : pour le joueur du jeton (et le MJ s'il le déplace lui-même)
+    if (actor && (player || mover)) {
+      const region = zone.parent?.parent ?? event.region;
+      showZoneBanner(zone, {
+        place: region?.name,
+        actor,
+        service: !!s && sameScene,
+        staff: !!s?.staff?.[actor.id]
+      });
+    }
+
+    if (!actor || !s || !sameScene) return refreshServiceApps();
     if (zone.mode === "work") {
       if (actor.type !== "character") return refreshServiceApps();
       if (mover && !s.staff[actor.id]) await sendOp({ type: "join", actorId: actor.id });
