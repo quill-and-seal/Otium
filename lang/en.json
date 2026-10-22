@@ -4,7 +4,8 @@
       "Menu": "Otium — Tavern menu",
       "Taverns": "Otium — Manage taverns",
       "Service": "Otium — Service: take your post",
-      "ServiceGM": "Otium — Service (GM)"
+      "ServiceGM": "Otium — Service (GM)",
+      "SidebarTab": "Otium — GM tab (sidebar)"
     },
     "Tavern": {
       "Unnamed": "Unnamed tavern"
@@ -109,7 +110,7 @@
       "none": "Not served"
     },
     "Service": {
-      "None": "No service running. The GM opens one from the \"Service (GM)\" tool.",
+      "None": "No service running. The GM opens one from the Otium tab of the sidebar.",
       "Ended": "The service is over. Thanks for the help!",
       "Table": "Table {n}",
       "Perfect": "perfect",
@@ -353,6 +354,17 @@
           "hint": "For a Table zone: the service table the player sits at."
         }
       }
+    },
+    "Sidebar": {
+      "Tab": "Otium (GM)",
+      "Tavern": "Scene tavern",
+      "Service": "Service",
+      "NoTavern": "— Tavern closed —",
+      "NoScene": "No active scene.",
+      "TavernHint": "Pick the tavern open on this scene.",
+      "LockedDuringService": "End the service to change tavern.",
+      "AllTaverns": "All taverns",
+      "Popout": "Open in a window"
     }
   },
   "TYPES": {

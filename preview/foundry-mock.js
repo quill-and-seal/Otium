@@ -469,6 +469,16 @@ class ApplicationV2 {
     const el = document.createElement(this.options.tag ?? "div");
     el.className = ["application", ...this.options.classes].join(" ");
     el.id = this.id;
+    // Onglet de barre latérale : pas de cadre, rendu dans le panneau « barre latérale » du banc
+    if (this.options.window?.frame === false) {
+      el.classList.remove("application");
+      el.classList.add("bench-tab");
+      this.window = { content: el, title: null };
+      el.addEventListener("click", (event) => this.#dispatch(event, el));
+      document.getElementById(this.options.mount ?? "sidebar-mount").replaceChildren(el);
+      this.element = el;
+      return;
+    }
     const width = this.options.position?.width;
     if (typeof width === "number") el.style.width = `min(${width}px, 100%)`;
     el.innerHTML = `
@@ -484,18 +494,9 @@ class ApplicationV2 {
       content: el.querySelector(".window-content")
     };
 
-    el.addEventListener("click", async (event) => {
+    el.addEventListener("click", (event) => {
       if (event.target.closest("[data-bench-close]")) return this.close();
-      const target = event.target.closest("[data-action]");
-      if (!target || !el.contains(target) || target.disabled) return;
-      const fn = this.options.actions?.[target.dataset.action];
-      if (!fn) return;
-      event.preventDefault();
-      try {
-        await fn.call(this, event, target);
-      } catch (err) {
-        bench.report(err);
-      }
+      this.#dispatch(event, el);
     });
 
     if (this.options.tag === "form") {
@@ -513,13 +514,26 @@ class ApplicationV2 {
     this.element = el;
   }
 
+  async #dispatch(event, el) {
+    const target = event.target.closest("[data-action]");
+    if (!target || !el.contains(target) || target.disabled) return;
+    const fn = this.options.actions?.[target.dataset.action];
+    if (!fn) return;
+    event.preventDefault();
+    try {
+      await fn.call(this, event, target);
+    } catch (err) {
+      bench.report(err);
+    }
+  }
+
   async render(options = {}) {
     const first = !this.element;
     if (first) this.#build();
     const result = await this._renderHTML({}, options);
     if (!this.element) return this;
     this._replaceHTML(result, this.window.content, options);
-    this.window.title.textContent = this.title;
+    if (this.window.title) this.window.title.textContent = this.title;
     if (first) this._onFirstRender({}, options);
     this._onRender({}, options);
     if (options.force && !first) {
@@ -595,12 +609,37 @@ class Field {
 }
 class RegionBehaviorType {}
 
+/** Onglets de la barre latérale : le banc n'en affiche qu'un, dans son panneau. */
+class AbstractSidebarTab extends ApplicationV2 {
+  static DEFAULT_OPTIONS = { classes: ["tab", "sidebar-tab"], window: { frame: false, positioned: false } };
+  get active() {
+    return true;
+  }
+  get isPopout() {
+    return false;
+  }
+  activate() {
+    document.getElementById("sidebar-panel")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    this._onActivate?.();
+  }
+  _onActivate() {}
+}
+class Sidebar {
+  static TABS = {
+    chat: { documentName: "ChatMessage" },
+    actors: { documentName: "Actor" },
+    settings: { tooltip: "SIDEBAR.TabSettings", icon: "fa-solid fa-gears" }
+  };
+}
+globalThis.ui.sidebar = { expanded: true, expand() {}, changeTab() {} };
+
 globalThis.CONST = { REGION_EVENTS: { TOKEN_ENTER: "tokenEnter", TOKEN_EXIT: "tokenExit" } };
 globalThis.CONFIG.RegionBehavior = { dataModels: {}, typeIcons: {} };
+globalThis.CONFIG.ui = {};
 
 globalThis.foundry = {
   utils: { deepClone, randomID, getProperty, setProperty, hasProperty, expandObject, mergeObject: mergeDeep },
-  applications: { api: { ApplicationV2, DialogV2 } },
+  applications: { api: { ApplicationV2, DialogV2 }, sidebar: { AbstractSidebarTab, Sidebar } },
   data: {
     regionBehaviors: { RegionBehaviorType },
     fields: { StringField: Field, SetField: Field, NumberField: Field, BooleanField: Field }

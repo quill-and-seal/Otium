@@ -4,7 +4,8 @@
       "Menu": "Otium — Carte de la taverne",
       "Taverns": "Otium — Gérer les tavernes",
       "Service": "Otium — Service : prendre son poste",
-      "ServiceGM": "Otium — Service (MJ)"
+      "ServiceGM": "Otium — Service (MJ)",
+      "SidebarTab": "Otium — Onglet MJ (barre latérale)"
     },
     "Tavern": {
       "Unnamed": "Taverne sans nom"
@@ -109,7 +110,7 @@
       "none": "Pas en salle"
     },
     "Service": {
-      "None": "Aucun service en cours. Le MJ l'ouvre depuis l'outil « Service (MJ) ».",
+      "None": "Aucun service en cours. Le MJ l'ouvre depuis l'onglet Otium de la barre latérale.",
       "Ended": "Le service est terminé. Merci pour le coup de main !",
       "Table": "Table {n}",
       "Perfect": "parfait",
@@ -353,6 +354,17 @@
           "hint": "Pour une zone Table : la table du service où le joueur s'installe."
         }
       }
+    },
+    "Sidebar": {
+      "Tab": "Otium (MJ)",
+      "Tavern": "Taverne de la scène",
+      "Service": "Service",
+      "NoTavern": "— Taverne fermée —",
+      "NoScene": "Aucune scène active.",
+      "TavernHint": "Choisir la taverne ouverte sur cette scène.",
+      "LockedDuringService": "Terminez le service pour changer de taverne.",
+      "AllTaverns": "Toutes les tavernes",
+      "Popout": "Ouvrir en fenêtre"
     }
   },
   "TYPES": {

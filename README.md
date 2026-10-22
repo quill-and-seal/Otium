@@ -23,29 +23,34 @@ Active ensuite le module dans ton monde **dnd5e**.
 
 ## Démarrage rapide
 
-1. **MJ** : dans la barre de gauche, groupe **Jetons**, clique sur **Gérer les tavernes** (icône d'échoppe).
+1. **MJ** : ouvre l'onglet **Otium** de la barre latérale, puis **Toutes les tavernes**.
 2. Choisis un modèle (**Auberge de village**, **Taverne de port** ou **Établissement chic**) et clique sur **Créer**.
-3. Clique sur la **porte** à côté de la taverne pour l'ouvrir sur la scène active.
+3. Dans l'onglet, choisis cette taverne dans **Taverne de la scène** : elle ouvre sur la scène active.
 4. **Joueurs** : dans le groupe Jetons, l'icône de **chope** ouvre la carte. Ils commandent seuls.
 
 Pour que les joueurs tiennent la taverne à la place, voir [Mode Service](#mode-service--les-joueurs-tiennent-la-taverne).
 
 ## Les outils
 
-Tout se trouve dans le groupe **Jetons** de la barre de gauche :
+**Joueurs** : dans le groupe **Jetons** de la barre de gauche.
 
-| Outil | Pour qui | Rôle |
-| --- | --- | --- |
-| Chope — *Carte de la taverne* | Tous | Commander. Pendant un service : s'attabler et commander aux serveurs |
-| Clochette — *Service : prendre son poste* | Joueurs | Ouvrir son poste de serveur |
-| Presse-papiers — *Service (MJ)* | MJ | Ouvrir, piloter et terminer un service |
-| Échoppe — *Gérer les tavernes* | MJ | Créer, modifier, ouvrir et fermer les tavernes |
+| Outil | Rôle |
+| --- | --- |
+| Chope — *Carte de la taverne* | Commander. Pendant un service : s'attabler et commander aux serveurs |
+| Clochette — *Service : prendre son poste* | Ouvrir son poste de serveur |
+
+**MJ** : tout est dans l'onglet **Otium** de la barre latérale (icône de chope, juste avant les réglages). Le bouton *Onglet MJ* du groupe Jetons y mène aussi.
+
+| Partie de l'onglet | Rôle |
+| --- | --- |
+| *Taverne de la scène* | Choisir la taverne ouverte sur la scène (ou la fermer), voir sa carte, la modifier, ouvrir la liste de toutes les tavernes |
+| *Service* | Ouvrir, lancer et piloter un service, suivre la salle et le personnel, voir le bilan et verser les pourboires. *Ouvrir en fenêtre* l'affiche en grand |
 
 ## Mode Clientèle : les joueurs commandent seuls
 
 ### Préparer une taverne (MJ)
 
-Dans **Gérer les tavernes** :
+Dans **Toutes les tavernes** (onglet Otium) :
 
 - **Créer** à partir d'un modèle, ou d'une taverne vide.
 - **Crayon** : modifier le nom, le tenancier, la description et la carte. Pour chaque article : catégorie (boissons, plats, chambres, divers), prix, stock (vide = illimité), effet, et poste de service.
@@ -88,7 +93,7 @@ Le temps visé dépend des plats commandés (un ragoût prend plus de temps qu'u
 ### Lancer un service (MJ)
 
 1. Ouvre une taverne sur la scène (voir plus haut).
-2. Ouvre l'outil **Service (MJ)**, choisis le nombre de tables et clique sur **Ouvrir le service**. Le chat invite les joueurs à prendre leur poste.
+2. Dans l'onglet **Otium**, partie *Service*, choisis le nombre de tables et clique sur **Ouvrir le service**. Le chat invite les joueurs à prendre leur poste.
 3. Quand tout le monde est prêt, clique sur **Lancer le service**.
 
 Pendant le service, le MJ peut :

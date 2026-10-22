@@ -126,6 +126,9 @@
   .chat-message code { font-family: var(--font-mono); font-size: 0.8rem; }
   .chat-message .message-content { overflow-wrap: anywhere; }
 
+  .bench-sidebar #sidebar-mount { background: var(--win); border: 1px solid var(--line); border-radius: 6px; max-height: 75vh; overflow-y: auto; }
+  .bench-tab button, .bench-tab select, .bench-tab input[type="number"] { background: var(--input); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; min-height: 28px; cursor: pointer; color: var(--fg); display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .bench-tab button:disabled { opacity: 0.45; cursor: default; }
   .notes { font-size: 0.85rem; color: var(--muted); margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
 
   /* ---- Faux Foundry : fenêtres ---- */
@@ -225,6 +228,7 @@
         <li>Enchaîner les eaux-de-vie jusqu'à Ivre, puis Repos long.</li>
         <li>Côté MJ : créer une taverne, modifier la carte, l'ouvrir et la fermer.</li>
         <li>Service : en MJ, outil « Service (MJ) », ouvrir puis lancer. En Alice, outil « Service », prendre son poste. En Bruno, la chope installe Lyra à une table.</li>
+        <li>Onglet MJ : en jouant le MJ, la colonne de droite montre l'onglet Otium de la barre latérale (taverne de la scène et pilotage du service).</li>
         <li>Postes de service : la scène a un comptoir, une cuisine et trois tables. Déplacez le jeton de Thorin (« Jeton sur la scène ») : seuls les postes de sa zone répondent. Posez Lyra sur une table pendant un service : elle s'y installe.</li>
       </ul>
     </section>
@@ -236,6 +240,10 @@
   </div>
 
   <div class="col chat">
+    <section class="panel bench-sidebar" id="sidebar-panel" hidden>
+      <h2>Barre latérale · onglet Otium (MJ)</h2>
+      <div id="sidebar-mount"></div>
+    </section>
     <section class="panel">
       <h2>Chat <button type="button" id="clear-chat">Vider</button></h2>
       <ul id="chat"></ul>

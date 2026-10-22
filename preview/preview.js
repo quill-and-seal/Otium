@@ -158,7 +158,14 @@ function renderWindowsHint() {
   $("#windows-empty").hidden = openApps.size > 0;
 }
 
+function renderSidebar() {
+  const panel = $("#sidebar-panel");
+  panel.hidden = !game.user.isGM;
+  if (game.user.isGM && ui.otium) ui.otium.render({ force: true });
+}
+
 function renderAll() {
+  renderSidebar();
   renderTopbar();
   renderControls();
   renderActors();
@@ -248,6 +255,9 @@ document.addEventListener("mouseover", (event) => {
 
 async function start() {
   Hooks.callAll("init");
+  // « setup » se joue côté MJ : c'est lui qui reçoit l'onglet de la barre latérale
+  Hooks.callAll("setup");
+  for (const [name, Cls] of Object.entries(CONFIG.ui)) ui[name] = new Cls();
   Hooks.callAll("ready");
   Hooks.callAll("canvasReady");
 

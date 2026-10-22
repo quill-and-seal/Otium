@@ -70,7 +70,7 @@ function barState(s, kind, id, now) {
 /* -------------------------------------------- */
 
 let liveTimer = null;
-function ensureLive() {
+export function ensureLive() {
   if (liveTimer) return;
   liveTimer = setInterval(() => {
     let any = false;
@@ -107,8 +107,13 @@ class ServiceApp extends OtiumApp {
   }
 
   updateLive() {
+    updateLiveIn(this.element);
+  }
+}
+
+/** Anime les jauges, chronos et horloges d'un bloc HTML du service, sans le redessiner. */
+export function updateLiveIn(root) {
     const s = getService();
-    const root = this.element;
     if (!s || !root) return;
     const now = serviceNow();
     for (const el of root.querySelectorAll("[data-otium-bar]")) {
@@ -133,7 +138,6 @@ class ServiceApp extends OtiumApp {
     }
     const c = root.querySelector("[data-otium-clock]");
     if (c) c.textContent = clock(now);
-  }
 }
 
 /** Chronomètre d'une commande : il part de 0, et le palier dit le pourboire en jeu. */
@@ -680,6 +684,35 @@ export class ServiceServerApp extends ServiceApp {
 /*  Vue MJ                                      */
 /* ============================================ */
 
+/** Actions du pilotage du service (fenêtre MJ et onglet de la barre latérale). */
+export const GM_SERVICE_ACTIONS = {
+  open: async function () {
+    const tables = Number(this.element.querySelector("input[name=tables]")?.value) || 6;
+    await openService({ tables });
+  },
+  start: () => sendOp({ type: "start" }),
+  pause: () => sendOp({ type: "pause" }),
+  speed: (event, target) => sendOp({ type: "speed", value: Number(target.dataset.value) }),
+  spawn: (event, target) => sendOp({ type: "spawn", variant: target.dataset.variant }),
+  end: async () => {
+    const ok = await DialogV2.confirm({
+      window: { title: L("GM.End") },
+      content: `<p>${L("GM.EndConfirm")}</p>`
+    });
+    if (ok) await sendOp({ type: "end" });
+  },
+  openServer: () => openServiceServer(),
+  openClient: () => openServiceClient(),
+  payTips: () => payTips(),
+  dismiss: () => dismissSummary()
+};
+
+/** Branche les réglages qui ne sont pas des boutons (affluence, temps visé). */
+export function bindGMInputs(root) {
+  root.querySelector("select[name=rush]")?.addEventListener("change", (event) => sendOp({ type: "rush", value: event.target.value }));
+  root.querySelector("input[name=patience]")?.addEventListener("change", (event) => sendOp({ type: "patience", value: Number(event.target.value) }));
+}
+
 export class ServiceGMApp extends ServiceApp {
   constructor(options = {}) {
     super({ id: "otium-service-gm", ...options });
@@ -689,18 +722,7 @@ export class ServiceGMApp extends ServiceApp {
     classes: ["otium", "otium-service", "otium-service-gm"],
     window: { icon: "fa-solid fa-clipboard-list", resizable: true },
     position: { width: 640, height: "auto" },
-    actions: {
-      open: ServiceGMApp.#onOpen,
-      start: () => sendOp({ type: "start" }),
-      pause: () => sendOp({ type: "pause" }),
-      speed: (event, target) => sendOp({ type: "speed", value: Number(target.dataset.value) }),
-      spawn: (event, target) => sendOp({ type: "spawn", variant: target.dataset.variant }),
-      end: ServiceGMApp.#onEnd,
-      openServer: () => openServiceServer(),
-      openClient: () => openServiceClient(),
-      payTips: () => payTips(),
-      dismiss: () => dismissSummary()
-    }
+    actions: GM_SERVICE_ACTIONS
   };
 
   get title() {
@@ -708,8 +730,18 @@ export class ServiceGMApp extends ServiceApp {
   }
 
   _html() {
+    return gmServiceHtml();
+  }
+
+  _onRender(context, options) {
+    super._onRender(context, options);
+    bindGMInputs(this.element);
+  }
+}
+
+export function gmServiceHtml() {
     const s = getService();
-    if (!s) return this._setupHtml();
+    if (!s) return gmSetupHtml();
     const st = s.stats;
     const sat = st.finished ? Math.round((100 * st.happy) / st.finished) : 100;
 
@@ -781,7 +813,7 @@ export class ServiceGMApp extends ServiceApp {
       </footer>`;
   }
 
-  _setupHtml() {
+function gmSetupHtml() {
     const summary = getSummary();
     let summaryHtml = "";
     if (summary) {
@@ -817,26 +849,6 @@ export class ServiceGMApp extends ServiceApp {
       : `<p class="hint">${t("Menu.NoTavern")}</p>`;
     return `${summaryHtml}${setup}`;
   }
-
-  _onRender(context, options) {
-    super._onRender(context, options);
-    this.element.querySelector("select[name=rush]")?.addEventListener("change", (event) => sendOp({ type: "rush", value: event.target.value }));
-    this.element.querySelector("input[name=patience]")?.addEventListener("change", (event) => sendOp({ type: "patience", value: Number(event.target.value) }));
-  }
-
-  static async #onOpen() {
-    const tables = Number(this.element.querySelector("input[name=tables]")?.value) || 6;
-    await openService({ tables });
-  }
-
-  static async #onEnd() {
-    const ok = await DialogV2.confirm({
-      window: { title: L("GM.End") },
-      content: `<p>${L("GM.EndConfirm")}</p>`
-    });
-    if (ok) await sendOp({ type: "end" });
-  }
-}
 
 /* ============================================ */
 /*  Vue Client                                  */

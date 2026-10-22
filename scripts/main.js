@@ -17,6 +17,7 @@ import { MenuApp, refreshApps, openApps, openMenu, openSceneMenu, openTavernList
 import { getService, getSummary, openService, sendOp, handleServiceSocket, requestSync, payTips } from "./service.js";
 import { ServiceClientApp, openServiceServer, openServiceGM, openServiceClient } from "./service-apps.js";
 import { registerStationBehavior, onZoneEvent, STATION_BEHAVIOR } from "./zones.js";
+import { registerSidebarTab, hasSidebarTab, TAB_NAME } from "./sidebar.js";
 
 /* -------------------------------------------- */
 /*  Initialisation                              */
@@ -53,6 +54,7 @@ Hooks.once("init", () => {
     drunkLevel,
     addAlcohol,
     sober,
+    openSidebar: () => showSidebarTab(),
     service: {
       get: getService,
       summary: getSummary,
@@ -65,6 +67,23 @@ Hooks.once("init", () => {
     }
   };
 });
+
+/* -------------------------------------------- */
+/*  Onglet MJ de la barre latérale              */
+/* -------------------------------------------- */
+
+// « setup » : on sait si l'utilisateur est MJ, et la barre latérale n'est pas encore créée
+Hooks.once("setup", () => {
+  if (registerSidebarTab()) log("Onglet MJ ajouté à la barre latérale");
+});
+
+/** Affiche l'onglet Otium de la barre latérale. */
+function showSidebarTab() {
+  const app = ui[TAB_NAME];
+  if (typeof app?.activate === "function") app.activate();
+  else ui.sidebar?.changeTab?.(TAB_NAME, "primary");
+  if (ui.sidebar?.expanded === false) ui.sidebar.expand?.();
+}
 
 /* -------------------------------------------- */
 /*  Socket : le MJ écrit ce que les joueurs     */
@@ -106,6 +125,19 @@ Hooks.on("getSceneControlButtons", (controls) => {
     // Pendant un service, la chope installe le joueur à une table : ce sont les serveurs qui préparent
     onChange: () => (getService() ? openServiceClient() : openSceneMenu())
   });
+
+  // Le MJ a son onglet dans la barre latérale : un seul bouton pour y aller
+  if (game.user.isGM && hasSidebarTab()) {
+    add({
+      name: "otium-gm",
+      title: "OTIUM.Controls.SidebarTab",
+      icon: "fa-solid fa-clipboard-list",
+      button: true,
+      order: order + 1,
+      onChange: () => showSidebarTab()
+    });
+    return;
+  }
 
   add({
     name: "otium-service",

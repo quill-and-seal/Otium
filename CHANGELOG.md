@@ -1,5 +1,14 @@
 # Journal des versions
 
+## 0.1.4
+
+L'onglet du MJ.
+
+- Nouvel onglet **Otium** dans la barre latérale, réservé au MJ (icône de chope, juste avant les réglages)
+- **Taverne de la scène** : choisir la taverne ouverte (ou la fermer) dans une liste, voir sa carte, la modifier, ouvrir la liste de toutes les tavernes ; le choix est verrouillé pendant un service
+- **Service** : tout le pilotage directement dans l'onglet (ouvrir, lancer, pause, vitesse, affluence, temps visé, événements, salle avec les chronos, personnel, journal, bilan et pourboires), et un bouton pour l'ouvrir en fenêtre
+- Groupe Jetons allégé côté MJ : la chope et un bouton qui affiche l'onglet Otium remplacent « Service (MJ) » et « Gérer les tavernes ». Sans onglet disponible, les anciens boutons reviennent
+
 ## 0.1.3
 
 Le chrono remplace la patience.

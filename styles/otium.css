@@ -992,3 +992,60 @@
     transition: none;
   }
 }
+
+/* ============================================ */
+/*  Onglet MJ de la barre latérale              */
+/* ============================================ */
+
+.otium-sidebar {
+  overflow-y: auto;
+}
+
+.otium-sidebar .otium-body {
+  padding: 0.5rem 0.6rem 1rem;
+  gap: 0.6rem;
+}
+
+.otium-sidebar .otium-sidebar-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.otium-sidebar .otium-sidebar-head h2 {
+  margin: 0;
+  border: 0;
+  font-size: 1.2rem;
+  color: var(--otium-accent);
+}
+
+.otium-sidebar .otium-sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.otium-sidebar select[name="sceneTavern"] {
+  width: 100%;
+}
+
+.otium-sidebar .otium-row > button {
+  flex: 1 1 auto;
+}
+
+.otium-sidebar .otium-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.otium-sidebar .otium-grid {
+  font-size: 0.85rem;
+}
+
+.otium-sidebar .otium-log {
+  max-height: 160px;
+}
+
+.otium-sidebar .otium-footer {
+  flex-wrap: wrap;
+}
