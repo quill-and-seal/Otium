@@ -35,6 +35,15 @@ Hooks.once("init", () => {
     onChange: () => refreshApps()
   });
 
+  // Nombre de tables du prochain service (choisi par le MJ dans l'onglet Otium)
+  game.settings.register(MODULE_ID, "tables", {
+    scope: "world",
+    config: false,
+    type: Number,
+    default: 6,
+    onChange: () => refreshApps()
+  });
+
   // Langue d'Otium, indépendante de celle de Foundry (bouton FR / EN des fenêtres)
   game.settings.register(MODULE_ID, "language", {
     name: "OTIUM.Settings.Language.Name",

@@ -59,7 +59,7 @@ L'onglet **Otium** de la barre latérale (icône de chope, juste avant les régl
 
 **Service**
 
-- Sans service : choisis le nombre de tables, puis **Ouvrir le service**. Après un service, le **bilan** s'affiche ici, avec **Verser les pourboires**.
+- Sans service : règle le nombre de tables avec **− / +** (le choix est gardé d'une séance à l'autre, et vaut au moins le plus grand numéro de table posé en zone), puis **Ouvrir le service**. Le compteur reste disponible pendant le service : « + » ajoute une table, « − » retire la dernière si elle est libre. Après un service, le **bilan** s'affiche ici, avec **Verser les pourboires**.
 - Pendant un service : lancer ou mettre en pause, vitesse ×2, affluence, temps visé, événements, puis la salle avec les chronos, le personnel et le journal, mis à jour en direct.
 - **Ouvrir en fenêtre** affiche le même pilotage en grand, pratique sur un deuxième écran.
 
@@ -112,7 +112,7 @@ Le temps visé dépend des plats commandés (un ragoût prend plus de temps qu'u
 ### Lancer un service (MJ)
 
 1. Ouvre une taverne sur la scène (voir plus haut).
-2. Dans l'onglet **Otium**, partie *Service*, choisis le nombre de tables et clique sur **Ouvrir le service**. Le chat invite les joueurs à prendre leur poste.
+2. Dans l'onglet **Otium**, partie *Service*, règle le nombre de tables avec **− / +** et clique sur **Ouvrir le service**. Le chat invite les joueurs à prendre leur poste.
 3. Quand tout le monde est prêt, clique sur **Lancer le service**.
 
 Pendant le service, le MJ peut :

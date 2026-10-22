@@ -293,7 +293,8 @@
         "ExactNoTip": "Compte juste !",
         "NotActiveGM": "Seul le MJ actif (le premier MJ connecté) peut ouvrir un service.",
         "NotHere": "{name} doit être dans un poste « {zone} » pour ça.",
-        "NoSuchTable": "La table {n} n'existe pas dans ce service."
+        "NoSuchTable": "La table {n} n'existe pas dans ce service.",
+        "TableBusy": "La table {n} est occupée : on ne peut pas la retirer."
       },
       "Log": {
         "Opened": "Le service ouvre à {tavern}.",
@@ -313,7 +314,8 @@
         "CannotPay": "Table {n} : {name} n'a pas de quoi payer.",
         "LeftAngry": "Table {n} : {name} en a assez d'attendre et s'en va.",
         "LeftUnpaid": "Table {n} : {name} part sans payer ({total} perdus).",
-        "Burnt": "{dish} a brûlé sur le feu {n}."
+        "Burnt": "{dish} a brûlé sur le feu {n}.",
+        "TablesChanged": "La salle compte maintenant {n} tables."
       },
       "Zone": {
         "MoveTo": "Placez votre jeton dans un poste « {zone} ».",

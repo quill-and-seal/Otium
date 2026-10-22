@@ -1302,3 +1302,28 @@
   opacity: 0.9;
   vertical-align: middle;
 }
+
+/* ---- Compteur − n + (nombre de tables) ---- */
+
+.otium .otium-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.otium .otium-stepper button {
+  flex: 0 0 auto;
+  width: 1.8rem;
+  height: 1.8rem;
+  min-height: 0;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.otium .otium-stepper-value {
+  min-width: 1.6rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05em;
+}

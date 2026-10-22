@@ -14,7 +14,7 @@ import { MODULE_ID, SOCKET, t, warn, esc } from "./constants.js";
 import { sceneTavern, consumeStock } from "./store.js";
 import { priceToCp, walletToCp, pay, receive, cashGiven, formatCp } from "./currency.js";
 import { applyEffects } from "./effects.js";
-import { missingZone } from "./zones.js";
+import { missingZone, maxTableZone } from "./zones.js";
 
 /** Réglages du jeu (secondes, places…). */
 export const SERVICE = Object.freeze({
@@ -53,6 +53,27 @@ export function tierOf(elapsed, target) {
 /** Temps écoulé sur une commande (figé une fois tout servi). */
 export function ticketElapsed(ticket, now = serviceNow()) {
   return ticket.serveTime ?? Math.max(0, now - ticket.created);
+}
+
+/** Nombre de tables d'un service : de 1 à 12. */
+export const TABLES = Object.freeze({ min: 1, max: 12 });
+
+/** Nombre de tables choisi par le MJ pour le prochain service (au moins les tables posées en zone). */
+export function plannedTables(scene = canvas?.scene) {
+  let n = 6;
+  try {
+    n = Number(game.settings.get(MODULE_ID, "tables")) || 6;
+  } catch {
+    /* réglage pas encore enregistré */
+  }
+  return Math.min(TABLES.max, Math.max(TABLES.min, n, maxTableZone(scene)));
+}
+
+/** Change le nombre de tables prévu (MJ, réglage du monde). */
+export async function setPlannedTables(n) {
+  const value = Math.min(TABLES.max, Math.max(TABLES.min, Math.floor(Number(n) || 6)));
+  await game.settings.set(MODULE_ID, "tables", value);
+  return value;
 }
 
 /** Délai moyen entre deux clients selon l'affluence. */
@@ -210,7 +231,7 @@ function notice(user, key, data = {}, kind = "warn") {
 /* ============================================ */
 
 /** Ouvre un service dans la taverne de la scène (MJ). */
-export async function openService({ tavern = sceneTavern(), tables = 6 } = {}) {
+export async function openService({ tavern = sceneTavern(), tables = plannedTables() } = {}) {
   if (!game.user.isGM) return;
   if (!isAuthority()) return ui.notifications.warn(t("Service.Notice.NotActiveGM"));
   if (!tavern) return ui.notifications.warn(t("Menu.NoTavern"));
@@ -229,7 +250,7 @@ export async function openService({ tavern = sceneTavern(), tables = 6 } = {}) {
     }));
   if (!menu.length) return ui.notifications.warn(t("Service.Notice.NoMenu"));
 
-  const count = Math.min(12, Math.max(1, Math.floor(Number(tables) || 6)));
+  const count = Math.min(TABLES.max, Math.max(TABLES.min, Math.floor(Number(tables) || 6)));
   runtime.summary = null;
   runtime.state = {
     id: foundry.utils.randomID(),
@@ -596,7 +617,7 @@ async function applyPlayerEffects(actor, ticket) {
 /*  Actions (validées par le MJ actif)          */
 /* ============================================ */
 
-const GM_ONLY = new Set(["start", "pause", "speed", "rush", "patience", "spawn", "end"]);
+const GM_ONLY = new Set(["start", "pause", "speed", "rush", "patience", "spawn", "end", "tables"]);
 const STAFF_OPS = new Set(["launch", "takeOut", "trash", "prep", "take", "drop", "serve", "tap", "cashStart", "cashEnd", "cashCancel"]);
 const FREE_WHEN_BUSY = new Set(["take", "drop", "trash", "cashEnd", "cashCancel"]);
 
@@ -656,6 +677,24 @@ const OPS = {
   },
   patience: ({ s, op }) => {
     s.patienceMul = Math.min(2, Math.max(0.5, Number(op.value) || 1));
+  },
+  /* Ajouter ou retirer des tables en cours de service (on ne retire que des tables libres, en fin de salle) */
+  tables: ({ s, op, user }) => {
+    const want = Math.min(TABLES.max, Math.max(TABLES.min, Math.floor(Number(op.value) || s.tables.length)));
+    if (want === s.tables.length) return false;
+    if (want > s.tables.length) {
+      for (let n = s.tables.length + 1; n <= want; n++) s.tables.push({ n, ticket: null, reserved: null, paidNote: null });
+    } else {
+      while (s.tables.length > want) {
+        const last = s.tables[s.tables.length - 1];
+        if (last.ticket || last.reserved) {
+          notice(user, "Service.Notice.TableBusy", { n: last.n });
+          break;
+        }
+        s.tables.pop();
+      }
+    }
+    log("TablesChanged", { n: s.tables.length });
   },
   spawn: ({ op, user }) => {
     if (!spawn({ hurry: op.variant === "hurry", big: op.variant === "big", user })) return false;

@@ -1,5 +1,13 @@
 # Journal des versions
 
+## 0.1.6
+
+Le nombre de tables se règle enfin.
+
+- Le champ du nombre de tables est remplacé par un compteur **− n +**, dans l'onglet MJ et la vue MJ. Le choix est **enregistré** pour le monde : il ne revient plus à 6 quand l'onglet se redessine
+- Le nombre de tables se change aussi **pendant un service** : « + » ajoute une table, « − » retire la dernière si elle est libre
+- Il y a toujours au moins autant de tables que le plus grand numéro de table posé en zone sur la scène
+
 ## 0.1.5
 
 Bouton FR / EN et corrections des réglages d'une taverne.

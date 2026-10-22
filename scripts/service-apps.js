@@ -17,7 +17,7 @@ import { zoneActions } from "./zones.js";
 import {
   SERVICE, RUSH, getService, getSummary, serviceNow, onServiceChange, sendOp,
   openService, payTips, dismissSummary, menuItem, ticketTotal, isBusy,
-  TIERS, tierOf, ticketElapsed, formatTime, averageTime
+  TIERS, tierOf, ticketElapsed, formatTime, averageTime, TABLES, plannedTables, setPlannedTables
 } from "./service.js";
 
 const { DialogV2 } = foundry.applications.api;
@@ -703,10 +703,10 @@ export class ServiceServerApp extends ServiceApp {
 
 /** Actions du pilotage du service (fenêtre MJ et onglet de la barre latérale). */
 export const GM_SERVICE_ACTIONS = {
-  open: async function () {
-    const tables = Number(this.element.querySelector("input[name=tables]")?.value) || 6;
-    await openService({ tables });
-  },
+  open: async () => openService({ tables: plannedTables() }),
+  // Nombre de tables : avant le service, c'est le réglage du monde ; pendant, la salle change tout de suite
+  tablesDec: () => changeTables(-1),
+  tablesInc: () => changeTables(1),
   start: () => sendOp({ type: "start" }),
   pause: () => sendOp({ type: "pause" }),
   speed: (event, target) => sendOp({ type: "speed", value: Number(target.dataset.value) }),
@@ -723,6 +723,23 @@ export const GM_SERVICE_ACTIONS = {
   payTips: () => payTips(),
   dismiss: () => dismissSummary()
 };
+
+async function changeTables(delta) {
+  const s = getService();
+  if (s) return sendOp({ type: "tables", value: s.tables.length + delta });
+  await setPlannedTables(plannedTables() + delta);
+}
+
+/** Compteur − n + du nombre de tables. */
+function tablesStepper(count) {
+  return `
+    <span class="otium-stepper" role="group" aria-label="${esc(L("GM.Tables"))}">
+      <span class="otium-label">${L("GM.Tables")}</span>
+      <button type="button" data-action="tablesDec" ${count <= TABLES.min ? "disabled" : ""} aria-label="−1">−</button>
+      <b class="otium-stepper-value">${count}</b>
+      <button type="button" data-action="tablesInc" ${count >= TABLES.max ? "disabled" : ""} aria-label="+1">+</button>
+    </span>`;
+}
 
 /** Branche les réglages qui ne sont pas des boutons (affluence, temps visé). */
 export function bindGMInputs(root) {
@@ -802,6 +819,7 @@ export function gmServiceHtml() {
           <select name="rush">${Object.keys(RUSH).map((r) => `<option value="${r}" ${s.rush === r ? "selected" : ""}>${L(`Rush.${r}`)}</option>`).join("")}</select></label>
         <label class="otium-row">${L("GM.Patience")}
           <input type="range" name="patience" min="0.5" max="2" step="0.25" value="${s.patienceMul}"><span class="otium-clock">×${s.patienceMul}</span></label>
+        ${tablesStepper(s.tables.length)}
       </div>
       <div class="otium-row">
         <span class="otium-label">${L("GM.Events")}</span>
@@ -860,7 +878,7 @@ function gmSetupHtml() {
     const setup = tavern
       ? `<p>${L("GM.SetupHint", { tavern: esc(tavern.name || t("Tavern.Unnamed")) })}</p>
         <div class="otium-row">
-          <label class="otium-row">${L("GM.Tables")} <input type="number" name="tables" value="6" min="1" max="12" step="1" style="width:4rem"></label>
+          ${tablesStepper(plannedTables())}
           <button type="button" class="otium-primary" data-action="open"><i class="fa-solid fa-door-open"></i> ${L("GM.Open")}</button>
         </div>`
       : `<p class="hint">${t("Menu.NoTavern")}</p>`;

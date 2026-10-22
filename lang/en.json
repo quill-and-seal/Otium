@@ -293,7 +293,8 @@
         "ExactNoTip": "Exact change!",
         "NotActiveGM": "Only the active GM (the first connected GM) can open a service.",
         "NotHere": "{name} must be in a \"{zone}\" station for that.",
-        "NoSuchTable": "Table {n} doesn't exist in this service."
+        "NoSuchTable": "Table {n} doesn't exist in this service.",
+        "TableBusy": "Table {n} is occupied: it can't be removed."
       },
       "Log": {
         "Opened": "Service opens at {tavern}.",
@@ -313,7 +314,8 @@
         "CannotPay": "Table {n}: {name} can't pay.",
         "LeftAngry": "Table {n}: {name} is tired of waiting and leaves.",
         "LeftUnpaid": "Table {n}: {name} leaves without paying ({total} lost).",
-        "Burnt": "{dish} burnt on fire {n}."
+        "Burnt": "{dish} burnt on fire {n}.",
+        "TablesChanged": "The room now has {n} tables."
       },
       "Zone": {
         "MoveTo": "Move your token into a \"{zone}\" station.",

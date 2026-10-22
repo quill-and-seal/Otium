@@ -109,6 +109,17 @@ function regionsOfToken(token) {
   });
 }
 
+/** Plus grand numéro de table posé en zone sur la scène (0 s'il n'y en a pas). */
+export function maxTableZone(scene) {
+  let max = 0;
+  for (const region of scene?.regions ?? []) {
+    for (const b of behaviorsOf(region)) {
+      if (b.system?.mode === "table") max = Math.max(max, Number(b.system.table) || 0);
+    }
+  }
+  return max;
+}
+
 /** La scène a-t-elle au moins un poste de travail ? */
 export function hasWorkZones(scene) {
   for (const region of scene?.regions ?? []) {
