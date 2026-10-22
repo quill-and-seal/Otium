@@ -11,10 +11,10 @@
  */
 
 import { MODULE_ID, SOCKET, t, warn, esc } from "./constants.js";
-import { sceneTavern, consumeStock } from "./store.js";
+import { sceneTavern, getTavern, consumeStock } from "./store.js";
 import { priceToCp, walletToCp, pay, receive, cashGiven, formatCp } from "./currency.js";
 import { applyEffects } from "./effects.js";
-import { missingZone, maxTableZone } from "./zones.js";
+import { missingZone, maxTableZone, tableZoneName } from "./zones.js";
 
 /** Réglages du jeu (secondes, places…). */
 export const SERVICE = Object.freeze({
@@ -145,6 +145,26 @@ export function averageTime(stats) {
   return stats.served ? formatTime(stats.totalTime / stats.served) : "—";
 }
 
+/** Nom donné à une table : celui de la taverne, sinon celui de la Région « Table » de la scène. */
+function resolveTableName(tavern, n, scene = canvas?.scene) {
+  return tavern?.tables?.[n] || tableZoneName(scene, n) || "";
+}
+
+function newTable(n, tavern, scene) {
+  return { n, name: resolveTableName(tavern, n, scene), ticket: null, reserved: null, paidNote: null };
+}
+
+/** Nom d'affichage d'une table du service en cours (« Coin du feu », ou « Table 3 »). */
+export function tableName(n, s = runtime.state) {
+  const table = s?.tables?.find((tb) => tb.n === Number(n));
+  return table?.name || t("Service.Table", { n });
+}
+
+/** Ajoute le nom de la table aux données d'un texte qui en contient le numéro. */
+function withTable(data = {}) {
+  return data && data.n !== undefined && data.table === undefined ? { ...data, table: tableName(data.n) } : data;
+}
+
 export function menuItem(s, id) {
   return s?.menu.find((m) => m.id === id) ?? null;
 }
@@ -222,6 +242,7 @@ function broadcast() {
 }
 
 function notice(user, key, data = {}, kind = "warn") {
+  data = withTable(data);
   if (!user || user.id === game.user.id) ui.notifications[kind](t(key, data));
   else game.socket.emit(SOCKET, { action: "serviceNotice", userId: user.id, key, data, kind });
 }
@@ -267,7 +288,7 @@ export async function openService({ tavern = sceneTavern(), tables = plannedTabl
     seq: 1,
     menu,
     consumed: {},
-    tables: Array.from({ length: count }, (_, i) => ({ n: i + 1, ticket: null, reserved: null, paidNote: null })),
+    tables: Array.from({ length: count }, (_, i) => newTable(i + 1, tavern, canvas?.scene)),
     tickets: {},
     stove: Array(SERVICE.stoves).fill(null),
     board: Array(SERVICE.boards).fill(null),
@@ -403,7 +424,7 @@ function step() {
 function log(key, data = {}, kind = "") {
   const s = runtime.state;
   if (!s) return;
-  s.log.unshift({ t: s.t, key, data, kind });
+  s.log.unshift({ t: s.t, key, data: key === "TablesChanged" || key === "Burnt" ? data : withTable(data), kind });
   if (s.log.length > SERVICE.logSize) s.log.length = SERVICE.logSize;
 }
 
@@ -493,6 +514,7 @@ function closeTicket(ticket) {
 
 function setBusy(st, key, data, duration, then = null) {
   const s = runtime.state;
+  data = withTable(data);
   st.busy = { key, data, start: s.t, end: duration === null ? null : s.t + duration, then };
 }
 
@@ -683,7 +705,9 @@ const OPS = {
     const want = Math.min(TABLES.max, Math.max(TABLES.min, Math.floor(Number(op.value) || s.tables.length)));
     if (want === s.tables.length) return false;
     if (want > s.tables.length) {
-      for (let n = s.tables.length + 1; n <= want; n++) s.tables.push({ n, ticket: null, reserved: null, paidNote: null });
+      const tavern = getTavern(s.tavernId);
+      const scene = game.scenes.get?.(s.sceneId) ?? canvas?.scene;
+      for (let n = s.tables.length + 1; n <= want; n++) s.tables.push(newTable(n, tavern, scene));
     } else {
       while (s.tables.length > want) {
         const last = s.tables[s.tables.length - 1];

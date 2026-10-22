@@ -101,7 +101,10 @@
       "RemoveItem": "Remove item",
       "Service": "Service",
       "StationTip": "Station that prepares the item in Service mode",
-      "PrepTip": "Preparation time in seconds (kitchen, board)"
+      "PrepTip": "Preparation time in seconds (kitchen, board)",
+      "Tables": "Table names",
+      "TablesHint": "Optional. Empty: the name of the « Table » Region on the scene, otherwise « Table n ».",
+      "TablePlaceholder": "Table {n}"
     },
     "StationName": {
       "tap": "Tap",
@@ -140,8 +143,8 @@
         "Launch": "puts {dish} on the fire",
         "TakeOut": "takes a dish off the fire",
         "Prep": "prepares {dish}",
-        "Walk": "carries the tray to table {n}",
-        "Cash": "collects from table {n}"
+        "Walk": "carries the tray to {table}",
+        "Cash": "collects from {table}"
       },
       "Station": {
         "Tap": "Tap",
@@ -178,7 +181,7 @@
         "NoMatch": "No table is waiting for what's on the tray."
       },
       "Cash": {
-        "Title": "Till — table {n}",
+        "Title": "Till — {table}",
         "Due": "Bill",
         "Given": "{name} hands over",
         "Change": "Change to give",
@@ -279,7 +282,7 @@
         "Paused": "The service is paused.",
         "Unavailable": "Not possible right now.",
         "TrayFull": "The tray is full.",
-        "NothingFor": "Nothing on the tray for table {n}.",
+        "NothingFor": "Nothing on the tray for {table}.",
         "Cashing": "{name} is already collecting from this table.",
         "ClientGone": "The customer left before you finished.",
         "Exact": "Exact change! Tip: {tip}.",
@@ -293,8 +296,8 @@
         "ExactNoTip": "Exact change!",
         "NotActiveGM": "Only the active GM (the first connected GM) can open a service.",
         "NotHere": "{name} must be in a \"{zone}\" station for that.",
-        "NoSuchTable": "Table {n} doesn't exist in this service.",
-        "TableBusy": "Table {n} is occupied: it can't be removed."
+        "NoSuchTable": "{table} doesn't exist in this service.",
+        "TableBusy": "{table} is occupied: it can't be removed."
       },
       "Log": {
         "Opened": "Service opens at {tavern}.",
@@ -302,18 +305,18 @@
         "PausedLog": "Service paused.",
         "Joined": "{staff} takes their post.",
         "Left": "{staff} leaves their post.",
-        "Sat": "{name} sits at table {n}.",
-        "Ordered": "Table {n}: {name} orders {items}.",
-        "Called": "Table {n}: {name} calls a waiter.",
-        "ServedSome": "{staff} serves {count} item(s) to table {n}.",
-        "ServedAll": "{staff} served table {n}'s whole order in {time} ({tier}).",
-        "Paid": "Table {n} paid: {total}.",
-        "PaidTip": "Table {n} paid: {total}, tip {tip}.",
-        "ChangeShort": "{staff} gave table {n} too little change.",
-        "ChangeOver": "{staff} gave {amount} too much to table {n}.",
-        "CannotPay": "Table {n}: {name} can't pay.",
-        "LeftAngry": "Table {n}: {name} is tired of waiting and leaves.",
-        "LeftUnpaid": "Table {n}: {name} leaves without paying ({total} lost).",
+        "Sat": "{name} sits down: {table}.",
+        "Ordered": "{table}: {name} orders {items}.",
+        "Called": "{table}: {name} calls a waiter.",
+        "ServedSome": "{staff} serves {count} item(s): {table}.",
+        "ServedAll": "{staff} served the whole order of {table} in {time} ({tier}).",
+        "Paid": "{table} paid: {total}.",
+        "PaidTip": "{table} paid: {total}, tip {tip}.",
+        "ChangeShort": "{staff} gave too little change: {table}.",
+        "ChangeOver": "{staff} gave {amount} too much: {table}.",
+        "CannotPay": "{table}: {name} can't pay.",
+        "LeftAngry": "{table}: {name} is tired of waiting and leaves.",
+        "LeftUnpaid": "{table}: {name} leaves without paying ({total} lost).",
         "Burnt": "{dish} burnt on fire {n}.",
         "TablesChanged": "The room now has {n} tables."
       },

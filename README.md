@@ -147,6 +147,12 @@ Dans les réglages d'une taverne, la colonne **Service** indique pour chaque art
 
 Les trois modèles sont déjà réglés.
 
+### Nommer les tables (MJ)
+
+Dans les réglages d'une taverne, la section **Noms des tables** donne un nom à chaque table, de 1 à 12 : « Coin du feu », « Table des nains »… Pendant le service, ce nom remplace « Table 3 » partout (salle, plateau, caisse, vue MJ, journal, vue Client, encart).
+
+Une table sans nom prend celui de sa **Région** « Table » posée sur la scène, si la Région a un nom parlant ; sinon elle reste « Table n ». Les noms sont lus à l'ouverture du service.
+
 ## Postes de service : jouer avec les jetons
 
 C'est facultatif. Sans postes, tout se fait depuis les fenêtres. Avec, il faut amener son jeton au bon endroit : derrière le bar pour tirer une bière, en cuisine pour sortir le ragoût.

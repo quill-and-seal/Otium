@@ -101,7 +101,10 @@
       "RemoveItem": "Retirer l'article",
       "Service": "Service",
       "StationTip": "Poste qui prépare l'article en mode Service",
-      "PrepTip": "Temps de préparation en secondes (cuisine, planche)"
+      "PrepTip": "Temps de préparation en secondes (cuisine, planche)",
+      "Tables": "Noms des tables",
+      "TablesHint": "Facultatif. Vide : le nom de la Région « Table » posée sur la scène, sinon « Table n ».",
+      "TablePlaceholder": "Table {n}"
     },
     "StationName": {
       "tap": "Tireuse",
@@ -140,8 +143,8 @@
         "Launch": "met {dish} sur le feu",
         "TakeOut": "sort un plat du feu",
         "Prep": "prépare {dish}",
-        "Walk": "porte le plateau à la table {n}",
-        "Cash": "encaisse la table {n}"
+        "Walk": "porte le plateau vers {table}",
+        "Cash": "encaisse {table}"
       },
       "Station": {
         "Tap": "Tireuse",
@@ -178,7 +181,7 @@
         "NoMatch": "Aucune table n'attend ce qu'il y a sur le plateau."
       },
       "Cash": {
-        "Title": "Caisse — table {n}",
+        "Title": "Caisse — {table}",
         "Due": "Note",
         "Given": "{name} donne",
         "Change": "Monnaie à rendre",
@@ -279,7 +282,7 @@
         "Paused": "Le service est en pause.",
         "Unavailable": "Impossible pour l'instant.",
         "TrayFull": "Le plateau est plein.",
-        "NothingFor": "Rien sur le plateau pour la table {n}.",
+        "NothingFor": "Rien sur le plateau pour {table}.",
         "Cashing": "{name} encaisse déjà cette table.",
         "ClientGone": "Le client est parti avant la fin de l'encaissement.",
         "Exact": "Compte juste ! Pourboire : {tip}.",
@@ -293,8 +296,8 @@
         "ExactNoTip": "Compte juste !",
         "NotActiveGM": "Seul le MJ actif (le premier MJ connecté) peut ouvrir un service.",
         "NotHere": "{name} doit être dans un poste « {zone} » pour ça.",
-        "NoSuchTable": "La table {n} n'existe pas dans ce service.",
-        "TableBusy": "La table {n} est occupée : on ne peut pas la retirer."
+        "NoSuchTable": "{table} n'existe pas dans ce service.",
+        "TableBusy": "{table} est occupée : on ne peut pas la retirer."
       },
       "Log": {
         "Opened": "Le service ouvre à {tavern}.",
@@ -302,18 +305,18 @@
         "PausedLog": "Service en pause.",
         "Joined": "{staff} prend son poste.",
         "Left": "{staff} quitte son poste.",
-        "Sat": "{name} s'installe à la table {n}.",
-        "Ordered": "Table {n} : {name} commande {items}.",
-        "Called": "Table {n} : {name} appelle un serveur.",
-        "ServedSome": "{staff} sert {count} article(s) à la table {n}.",
-        "ServedAll": "{staff} a servi toute la commande de la table {n} en {time} ({tier}).",
-        "Paid": "Table {n} payée : {total}.",
-        "PaidTip": "Table {n} payée : {total}, pourboire {tip}.",
-        "ChangeShort": "{staff} n'a pas rendu assez de monnaie à la table {n}.",
-        "ChangeOver": "{staff} a rendu {amount} de trop à la table {n}.",
-        "CannotPay": "Table {n} : {name} n'a pas de quoi payer.",
-        "LeftAngry": "Table {n} : {name} en a assez d'attendre et s'en va.",
-        "LeftUnpaid": "Table {n} : {name} part sans payer ({total} perdus).",
+        "Sat": "{name} s'installe : {table}.",
+        "Ordered": "{table} : {name} commande {items}.",
+        "Called": "{table} : {name} appelle un serveur.",
+        "ServedSome": "{staff} sert {count} article(s) : {table}.",
+        "ServedAll": "{staff} a servi toute la commande de {table} en {time} ({tier}).",
+        "Paid": "{table} payée : {total}.",
+        "PaidTip": "{table} payée : {total}, pourboire {tip}.",
+        "ChangeShort": "{staff} n'a pas rendu assez de monnaie : {table}.",
+        "ChangeOver": "{staff} a rendu {amount} de trop : {table}.",
+        "CannotPay": "{table} : {name} n'a pas de quoi payer.",
+        "LeftAngry": "{table} : {name} en a assez d'attendre et s'en va.",
+        "LeftUnpaid": "{table} : {name} part sans payer ({total} perdus).",
         "Burnt": "{dish} a brûlé sur le feu {n}.",
         "TablesChanged": "La salle compte maintenant {n} tables."
       },

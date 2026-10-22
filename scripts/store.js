@@ -52,6 +52,12 @@ export function newTavern(data = {}) {
     keeper: String(data.keeper ?? ""),
     description: String(data.description ?? ""),
     effects: data.effects !== false,
+    // Noms des tables pour le mode Service : { [numéro]: nom } (vide = nom par défaut)
+    tables: Object.fromEntries(
+      Object.entries(data.tables ?? {})
+        .map(([n, name]) => [String(Math.floor(Number(n))), String(name ?? "").trim()])
+        .filter(([n, name]) => Number(n) >= 1 && Number(n) <= 12 && name)
+    ),
     menu: Array.isArray(data.menu) ? data.menu.map(newItem) : []
   };
 }

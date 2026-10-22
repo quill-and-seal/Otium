@@ -17,7 +17,7 @@ import { zoneActions } from "./zones.js";
 import {
   SERVICE, RUSH, getService, getSummary, serviceNow, onServiceChange, sendOp,
   openService, payTips, dismissSummary, menuItem, ticketTotal, isBusy,
-  TIERS, tierOf, ticketElapsed, formatTime, averageTime, TABLES, plannedTables, setPlannedTables
+  TIERS, tierOf, ticketElapsed, formatTime, averageTime, TABLES, plannedTables, setPlannedTables, tableName
 } from "./service.js";
 
 const { DialogV2 } = foundry.applications.api;
@@ -315,7 +315,7 @@ export class ServiceServerApp extends ServiceApp {
     const given = cashGiven(due);
     return `
       <section class="otium-cash">
-        <h3>${L("Cash.Title", { n: ticket.table })}</h3>
+        <h3>${L("Cash.Title", { table: esc(tableName(ticket.table)) })}</h3>
         <div class="otium-cash-lines">
           <span>${L("Cash.Due")}</span><strong>${formatCp(due)}</strong>
           <span>${L("Cash.Given", { name: esc(ticket.name) })}</span><strong>${formatCp(given)}</strong>
@@ -337,7 +337,7 @@ export class ServiceServerApp extends ServiceApp {
         const ticket = tb.ticket && s.tickets[tb.ticket];
         if (!ticket) {
           const who = tb.reserved ? ` · ${L("Server.Settling", { name: esc(game.actors.get(tb.reserved)?.name ?? "") })}` : "";
-          return `<article class="otium-table empty"><header><strong>${L("Table", { n: tb.n })}</strong><span class="hint">${L("Server.FreeTable")}${who}</span></header></article>`;
+          return `<article class="otium-table empty"><header><strong>${esc(tableName(tb.n))}</strong><span class="hint">${L("Server.FreeTable")}${who}</span></header></article>`;
         }
         const needs = ticket.items.some((it) => !it.served && st.tray.some((d) => d.m === it.m));
         const bill = ticket.phase === "bill";
@@ -348,7 +348,7 @@ export class ServiceServerApp extends ServiceApp {
         else action = `<button type="button" class="otium-primary" data-action="cash" data-table="${tb.n}" ${disabled || ticket.cashier || !this.can("cash") ? "disabled" : ""}>${L("Server.Cash", { total: formatCp(ticketTotal(s, ticket)) })}</button>`;
         return `
           <article class="otium-table ${bill ? "bill" : ""} ${ticket.calling ? "calling" : ""}" ${bill ? "" : `data-drop="table:${tb.n}"`}>
-            <header><strong>${L("Table", { n: tb.n })}</strong><span class="hint">${bill ? L("Server.Bill") : ""}</span></header>
+            <header><strong>${esc(tableName(tb.n))}</strong><span class="hint">${bill ? L("Server.Bill") : ""}</span></header>
             <span class="otium-who" title="${esc(ticket.name)}">${ticket.calling ? '<i class="fa-solid fa-bell"></i> ' : ""}${ticket.kind === "player" ? whoHtml(ticket.name, ticket.actorId) : esc(ticket.name)}</span>
             <div class="otium-chips">${ticketChips(s, ticket)}</div>
             ${timerHtml(ticket)}
@@ -481,7 +481,7 @@ export class ServiceServerApp extends ServiceApp {
     else if (!targets.length) serveBar = `<p class="hint">${L("Counter.NoMatch")}</p>`;
     else
       serveBar = `<div class="otium-serve-to"><span class="otium-label">${L("Server.Serve")}</span>${targets
-        .map((x) => `<button type="button" class="${x.urgent ? "otium-primary" : ""}" data-action="serve" data-table="${x.n}" ${disabled ? "disabled" : ""}>${L("Table", { n: x.n })} · ${x.count}</button>`)
+        .map((x) => `<button type="button" class="${x.urgent ? "otium-primary" : ""}" data-action="serve" data-table="${x.n}" ${disabled ? "disabled" : ""}>${esc(tableName(x.n))} · ${x.count}</button>`)
         .join("")}</div>`;
 
     return `
@@ -784,11 +784,11 @@ export function gmServiceHtml() {
         const ticket = tb.ticket && s.tickets[tb.ticket];
         if (!ticket) {
           const who = tb.reserved ? ` (${L("Server.Settling", { name: esc(game.actors.get(tb.reserved)?.name ?? "") })})` : "";
-          return `<tr><td>${tb.n}</td><td class="hint" colspan="3">${L("Server.FreeTable")}${who}</td></tr>`;
+          return `<tr><td>${esc(tableName(tb.n))}</td><td class="hint" colspan="3">${L("Server.FreeTable")}${who}</td></tr>`;
         }
         const served = ticket.items.filter((it) => it.served).length;
         const state = ticket.phase === "bill" ? L("GM.WaitingBill") : L("GM.ServedCount", { served, total: ticket.items.length });
-        return `<tr><td>${tb.n}</td><td>${ticket.calling ? '<i class="fa-solid fa-bell"></i> ' : ""}${ticket.kind === "player" ? whoHtml(ticket.name, ticket.actorId) : esc(ticket.name)}</td><td>${state}</td>
+        return `<tr><td>${esc(tableName(tb.n))}</td><td>${ticket.calling ? '<i class="fa-solid fa-bell"></i> ' : ""}${ticket.kind === "player" ? whoHtml(ticket.name, ticket.actorId) : esc(ticket.name)}</td><td>${state}</td>
           <td>${timerHtml(ticket)}</td></tr>`;
       })
       .join("");
@@ -941,7 +941,7 @@ export class ServiceClientApp extends ServiceApp {
       const free = s.tables.filter((tb) => !tb.ticket && !tb.reserved);
       return `${head}
         <p class="notice">${L("Client.ChooseTable")}</p>
-        <div class="otium-row">${free.map((tb) => `<button type="button" data-action="sit" data-table="${tb.n}">${L("Table", { n: tb.n })}</button>`).join("") || `<span class="hint">${L("Notice.Full")}</span>`}</div>`;
+        <div class="otium-row">${free.map((tb) => `<button type="button" data-action="sit" data-table="${tb.n}">${esc(tableName(tb.n))}</button>`).join("") || `<span class="hint">${L("Notice.Full")}</span>`}</div>`;
     }
 
     if (!ticket) {
@@ -964,7 +964,7 @@ export class ServiceClientApp extends ServiceApp {
       const enough = walletToCp(actor.system?.currency) >= total;
       return `${head}
         ${table.paidNote ? `<p class="notice">${esc(t(table.paidNote.key, table.paidNote.data))} ${L("Client.Thanks")}</p>` : ""}
-        <p class="otium-label">${L("Table", { n: table.n })} · ${L("Client.Menu")}</p>
+        <p class="otium-label">${esc(tableName(table.n))} · ${L("Client.Menu")}</p>
         <ul class="otium-items">${rows}</ul>
         <footer class="otium-footer">
           <span class="otium-total ${enough ? "" : "too-much"}">${t("Order.Total")} : <strong>${formatCp(total)}</strong></span>
@@ -983,7 +983,7 @@ export class ServiceClientApp extends ServiceApp {
       [L("Client.StepBill", { total: formatCp(ticketTotal(s, ticket)) }), false, ticket.phase === "bill"]
     ];
     return `${head}
-      <p class="otium-label">${L("Table", { n: table.n })} · ${L("Client.YourOrder")}</p>
+      <p class="otium-label">${esc(tableName(table.n))} · ${L("Client.YourOrder")}</p>
       <div class="otium-chips">${ticketChips(s, ticket)}</div>
       ${timerHtml(ticket)}
       <ul class="otium-steps">${steps.map(([label, done, on]) => `<li class="${done ? "done" : on ? "on" : ""}"><span class="otium-dot"></span>${esc(label)}</li>`).join("")}</ul>

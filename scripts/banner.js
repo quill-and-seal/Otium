@@ -8,7 +8,7 @@
 
 import { MODULE_ID, t, esc } from "./constants.js";
 import { sceneTavern } from "./store.js";
-import { SERVICE, getService, onServiceChange, ticketElapsed, tierOf, formatTime } from "./service.js";
+import { SERVICE, getService, onServiceChange, ticketElapsed, tierOf, formatTime, tableName } from "./service.js";
 import { openServiceServer, openServiceClient } from "./service-apps.js";
 import { openSceneMenu } from "./apps.js";
 
@@ -98,13 +98,15 @@ function render() {
   const table = zone.mode === "table";
   const actor = game.actors.get(current.actorId);
   const s = getService();
-  const tableLabel = t("Service.Table", { n: zone.table });
-  const title = place || (table ? tableLabel : t("Card.Station"));
+  const tableLabel = s ? tableName(zone.table) : t("Service.Table", { n: zone.table });
+  // Une table prend son nom de service (« Coin du feu ») ; un poste, le nom de sa Région
+  const title = table ? (s ? tableLabel : place || tableLabel) : place || t("Card.Station");
 
   // Ce qu'on peut faire ici
   let what;
   if (table) {
-    what = title === tableLabel ? "" : `<span><i class="fa-solid fa-chair"></i> ${tableLabel}</span>`;
+    const number = t("Service.Table", { n: zone.table });
+    what = title === number ? "" : `<span><i class="fa-solid fa-chair"></i> ${number}</span>`;
   } else {
     const actions = [...(zone.actions ?? [])];
     what = actions.length

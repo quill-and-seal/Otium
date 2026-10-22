@@ -11,6 +11,7 @@ import { TEMPLATES, TEMPLATE_IDS } from "./presets.js";
 import { DENOMS, priceToCp, walletToCp, formatCp, formatWallet, abbr } from "./currency.js";
 import { buyerCandidates, defaultBuyer, placeOrder } from "./order.js";
 import { drunkLevel } from "./effects.js";
+import { tableZoneName } from "./zones.js";
 
 const { ApplicationV2, DialogV2 } = foundry.applications.api;
 
@@ -552,6 +553,17 @@ export class TavernConfig extends OtiumApp {
             (c) => `<button type="button" data-action="addItem" data-category="${c}"><i class="${CATEGORY_ICONS[c]}"></i> ${t(`Category.${c}`)}</button>`
           ).join("")}
         </div>
+      </fieldset>
+      <fieldset class="otium-tables-names">
+        <legend>${t("Config.Tables")}</legend>
+        <p class="hint">${t("Config.TablesHint")}</p>
+        <div class="otium-table-names">
+          ${Array.from({ length: 12 }, (_, i) => {
+            const n = i + 1;
+            const fallback = tableZoneName(canvas?.scene, n) || t("Config.TablePlaceholder", { n });
+            return `<label><span>${n}</span><input type="text" name="tables.${n}" value="${esc(tv.tables?.[n] ?? "")}" placeholder="${esc(fallback)}"></label>`;
+          }).join("")}
+        </div>
       </fieldset>`;
   }
 
@@ -584,6 +596,10 @@ export class TavernConfig extends OtiumApp {
     tavern.keeper = String(data.keeper ?? tavern.keeper);
     tavern.description = String(data.description ?? tavern.description);
     tavern.effects = !!data.effects;
+    if (data.tables) {
+      tavern.tables = {};
+      for (const [n, name] of Object.entries(data.tables)) if (String(name ?? "").trim()) tavern.tables[n] = String(name).trim();
+    }
     const rows = data.menu ?? {};
     tavern.menu = tavern.menu.map((item) => {
       const r = rows[item.id];

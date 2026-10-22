@@ -1327,3 +1327,24 @@
   font-variant-numeric: tabular-nums;
   font-size: 1.05em;
 }
+
+/* ---- Réglages d'une taverne : noms des tables ---- */
+
+.otium-config .otium-table-names {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.3rem 0.6rem;
+}
+
+.otium-config .otium-table-names label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.otium-config .otium-table-names label span {
+  min-width: 1.4rem;
+  text-align: right;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}

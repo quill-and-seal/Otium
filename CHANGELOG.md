@@ -2,11 +2,12 @@
 
 ## 0.1.6
 
-Le nombre de tables se règle enfin.
+Le nombre et les noms des tables.
 
 - Le champ du nombre de tables est remplacé par un compteur **− n +**, dans l'onglet MJ et la vue MJ. Le choix est **enregistré** pour le monde : il ne revient plus à 6 quand l'onglet se redessine
 - Le nombre de tables se change aussi **pendant un service** : « + » ajoute une table, « − » retire la dernière si elle est libre
 - Il y a toujours au moins autant de tables que le plus grand numéro de table posé en zone sur la scène
+- **Noms des tables** : une nouvelle section *Noms des tables* dans les réglages d'une taverne donne un nom à chaque table (« Coin du feu », « Table des nains »…). Sans nom, la table prend celui de sa Région « Table » sur la scène (s'il n'est pas juste « Table 3 »), sinon « Table n ». Le nom s'affiche partout pendant le service : salle, plateau, caisse, vue MJ, journal, vue Client et encart
 
 ## 0.1.5
 

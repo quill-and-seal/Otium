@@ -120,6 +120,18 @@ export function maxTableZone(scene) {
   return max;
 }
 
+/** Nom de la Région « Table » d'un numéro donné (vide si aucune ou si elle s'appelle juste « Table n »). */
+export function tableZoneName(scene, n) {
+  for (const region of scene?.regions ?? []) {
+    for (const b of behaviorsOf(region)) {
+      if (b.system?.mode !== "table" || Number(b.system.table) !== Number(n)) continue;
+      const name = String(region.name ?? "").trim();
+      if (name && !/^(table|tab\.?)\s*\d+$/i.test(name)) return name;
+    }
+  }
+  return "";
+}
+
 /** La scène a-t-elle au moins un poste de travail ? */
 export function hasWorkZones(scene) {
   for (const region of scene?.regions ?? []) {
